@@ -1,0 +1,11 @@
+body, html { margin: 0; background: #000; overflow: hidden; font-family: 'Segoe UI', sans-serif; color: white; }
+#top-bar { position: absolute; top: 0; width: 100%; padding: 10px; display: flex; justify-content: space-around; background: rgba(255,255,255,0.05); z-index: 100; }
+.ui-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.9); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 50; }
+.btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.shop-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 15px; }
+.item { background: #111; padding: 10px; border: 2px solid #333; text-align: center; }
+.item.rare { border-color: #00fbff; } .item.epic { border-color: #ffd700; } .item.legendary { border-color: #ff4500; }
+button { padding: 8px; background: none; border: 1px solid #fff; color: white; cursor: pointer; }
+button:hover { background: white; color: black; }
+textarea { width: 80%; height: 40px; background: #111; color: #0f0; font-family: monospace; font-size: 10px; margin-bottom: 10px; }
+input { padding: 8px; background: #111; border: 1px solid #333; color: white; margin-bottom: 5px; }
