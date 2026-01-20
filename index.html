@@ -2,26 +2,27 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>PONG 2D - NEON EDITION</title>
+    <title>PONG 2D | NEON EVOLUTION</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- PANTALLA DE PORTADA -->
+    <!-- PORTADA DINÁMICA -->
     <div id="title-screen" class="ui-overlay">
-        <div class="glitch-wrapper">
-            <h1 class="glow-text" data-text="PONG 2D">PONG 2D</h1>
+        <h1 class="logo">PONG <span class="accent">2D</span></h1>
+        <div class="hero-box">
+            <button class="btn-primary" onclick="enterGame()">EMPEZAR JUEGO</button>
+            <p class="hint">EDICIÓN COLECCIONISTA 2026</p>
         </div>
-        <p class="pulse-text">PRESIONA CUALQUIER BOTÓN PARA EMPEZAR</p>
-        <button class="btn-main" onclick="enterGame()">ENTRAR AL JUEGO</button>
     </div>
 
+    <!-- HUD SUPERIOR -->
     <div id="top-bar" style="display:none">
-        <span>👤 <b id="display-username">Jugador</b></span>
-        <span>💰 <b id="display-coins">0</b> PC</span>
-        <div class="top-btns">
-            <button onclick="showUI('shop')">🛒 Tienda</button>
-            <button onclick="showUI('inventory')">🎒 Colección</button>
-            <button onclick="showUI('profile')">🔑 Login</button>
+        <div class="user-info">👤 <span id="display-username">Jugador</span></div>
+        <div class="coin-info">💰 <span id="display-coins">0</span> PC</div>
+        <div class="nav-btns">
+            <button onclick="showUI('shop')">Tienda</button>
+            <button onclick="showUI('inventory')">Colección</button>
+            <button onclick="showUI('profile')">Perfil</button>
         </div>
     </div>
 
@@ -30,54 +31,59 @@
 
     <!-- MENÚ PRINCIPAL -->
     <div id="main-menu" class="ui-overlay" style="display:none">
-        <div class="btn-group">
-            <button onclick="startGame(1, false, 0, false)">1 VS 1</button>
-            <button onclick="startGame(2, false, 0, false)">2 VS 2</button>
-            <button onclick="startGame(1, false, 0, true)" class="caos-mode">MODO CAOS</button>
-            <button onclick="startGame(1, true, 0.1, false)">VS CPU PRO</button>
+        <div class="menu-card">
+            <h2>SELECCIONA MODO</h2>
+            <div class="grid-modes">
+                <button onclick="startGame(1, false, 0, false)">1 VS 1</button>
+                <button onclick="startGame(2, false, 0, false)">2 VS 2</button>
+                <button onclick="startGame(1, false, 0, true)" class="btn-caos">MODO CAOS</button>
+                <button onclick="startGame(1, true, 0.12, false)">VS CPU PRO</button>
+            </div>
         </div>
     </div>
 
-    <!-- INVENTARIO POR CATEGORÍAS -->
+    <!-- INVENTARIO POR PESTAÑAS -->
     <div id="inventory-menu" class="ui-overlay" style="display:none">
-        <h2>MI COLECCIÓN</h2>
-        <div class="tabs">
-            <button onclick="populateInventory('paddle')">PALAS</button>
-            <button onclick="populateInventory('ball')">BOLAS</button>
-            <button onclick="populateInventory('bg')">FONDOS</button>
+        <div class="window">
+            <div class="tabs">
+                <button onclick="populateInventory('paddle')">Palas</button>
+                <button onclick="populateInventory('ball')">Bolas</button>
+                <button onclick="populateInventory('bg')">Fondos</button>
+            </div>
+            <div id="inventory-list" class="item-grid"></div>
+            <button class="btn-close" onclick="showUI('main')">CERRAR</button>
         </div>
-        <div id="inventory-list" class="inventory-grid"></div>
-        <button class="btn-back" onclick="showUI('main')">VOLVER</button>
     </div>
 
-    <!-- TIENDA / LOOTBOX -->
+    <!-- TIENDA -->
     <div id="shop-menu" class="ui-overlay" style="display:none">
-        <h2>SUMINISTROS</h2>
-        <div class="shop-grid">
-            <div class="card common"><span>📦 BRONCE</span><button onclick="openBox('common')">100 PC</button></div>
-            <div class="card epic"><span>💎 ÉPICA</span><button onclick="openBox('epic')">500 PC</button></div>
-            <div class="card god"><span>🔥 DIOS</span><button onclick="openBox('god')">1500 PC</button></div>
+        <div class="window">
+            <h2>CAJAS DE SUMINISTROS</h2>
+            <div class="shop-grid">
+                <div class="loot-card bronze" onclick="openBox('common')">📦<br>Bronce<br><b>100 PC</b></div>
+                <div class="loot-card epic" onclick="openBox('epic')">💎<br>Épica<br><b>500 PC</b></div>
+                <div class="loot-card legendary" onclick="openBox('god')">🔥<br>Dios<br><b>1500 PC</b></div>
+            </div>
+            <button class="btn-close" onclick="showUI('main')">VOLVER</button>
         </div>
-        <button class="btn-back" onclick="showUI('main')">VOLVER</button>
     </div>
 
     <!-- PERFIL -->
     <div id="profile-menu" class="ui-overlay" style="display:none">
-        <h2>PERFIL 2026</h2>
-        <input type="text" id="username-input" placeholder="Nombre de usuario">
-        <button onclick="saveUsername()">GUARDAR</button>
-        <hr>
-        <p>LLAVE MAESTRA:</p>
-        <textarea id="save-code-output" readonly onclick="this.select()"></textarea>
-        <input type="text" id="load-code-input" placeholder="Pegar llave aquí...">
-        <button onclick="loadFromCode()">CARGAR SESIÓN</button>
-        <button class="btn-back" onclick="showUI('main')">VOLVER</button>
+        <div class="window">
+            <h2>MI CUENTA</h2>
+            <input type="text" id="username-input" placeholder="Nuevo nombre...">
+            <button onclick="saveUsername()">ACTUALIZAR</button>
+            <p>LLAVE DE ACCESO:</p>
+            <textarea id="save-code-output" readonly onclick="this.select()"></textarea>
+            <button class="btn-close" onclick="showUI('main')">VOLVER</button>
+        </div>
     </div>
 
     <!-- GAME OVER -->
     <div id="game-over" class="ui-overlay" style="display:none">
-        <h2 id="winner-text"></h2>
-        <button onclick="location.reload()">MENÚ PRINCIPAL</button>
+        <h1 id="winner-text">GANASTE</h1>
+        <button class="btn-primary" onclick="location.reload()">CONTINUAR</button>
     </div>
 
     <script src="game.js"></script>
