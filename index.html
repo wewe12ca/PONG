@@ -2,17 +2,26 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>PONG 2D - Ultimate 2026</title>
+    <title>PONG 2D - NEON EDITION</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="top-bar">
-        <span>👤 <b id="display-username">Invitado</b></span>
+    <!-- PANTALLA DE PORTADA -->
+    <div id="title-screen" class="ui-overlay">
+        <div class="glitch-wrapper">
+            <h1 class="glow-text" data-text="PONG 2D">PONG 2D</h1>
+        </div>
+        <p class="pulse-text">PRESIONA CUALQUIER BOTÓN PARA EMPEZAR</p>
+        <button class="btn-main" onclick="enterGame()">ENTRAR AL JUEGO</button>
+    </div>
+
+    <div id="top-bar" style="display:none">
+        <span>👤 <b id="display-username">Jugador</b></span>
         <span>💰 <b id="display-coins">0</b> PC</span>
         <div class="top-btns">
             <button onclick="showUI('shop')">🛒 Tienda</button>
-            <button onclick="showUI('inventory')">🎒 Inventario</button>
-            <button onclick="showUI('profile')">🔑 Perfil</button>
+            <button onclick="showUI('inventory')">🎒 Colección</button>
+            <button onclick="showUI('profile')">🔑 Login</button>
         </div>
     </div>
 
@@ -20,56 +29,55 @@
     <div id="mod-display" class="mod-indicator"></div>
 
     <!-- MENÚ PRINCIPAL -->
-    <div id="main-menu" class="ui-overlay">
-        <h1>PONG 2D</h1>
+    <div id="main-menu" class="ui-overlay" style="display:none">
         <div class="btn-group">
             <button onclick="startGame(1, false, 0, false)">1 VS 1</button>
             <button onclick="startGame(2, false, 0, false)">2 VS 2</button>
-            <button onclick="startGame(1, false, 0, true)" class="caos-mode">CAOS 1v1</button>
+            <button onclick="startGame(1, false, 0, true)" class="caos-mode">MODO CAOS</button>
             <button onclick="startGame(1, true, 0.1, false)">VS CPU PRO</button>
         </div>
     </div>
 
-    <!-- TIENDA -->
+    <!-- INVENTARIO POR CATEGORÍAS -->
+    <div id="inventory-menu" class="ui-overlay" style="display:none">
+        <h2>MI COLECCIÓN</h2>
+        <div class="tabs">
+            <button onclick="populateInventory('paddle')">PALAS</button>
+            <button onclick="populateInventory('ball')">BOLAS</button>
+            <button onclick="populateInventory('bg')">FONDOS</button>
+        </div>
+        <div id="inventory-list" class="inventory-grid"></div>
+        <button class="btn-back" onclick="showUI('main')">VOLVER</button>
+    </div>
+
+    <!-- TIENDA / LOOTBOX -->
     <div id="shop-menu" class="ui-overlay" style="display:none">
         <h2>SUMINISTROS</h2>
         <div class="shop-grid">
-            <div class="item bronze"><span>📦 BRONCE</span><small>Común/Raro</small><button onclick="openBox('common')">100 PC</button></div>
-            <div class="item epic"><span>💎 ÉPICA</span><small>Raro/Épico</small><button onclick="openBox('epic')">500 PC</button></div>
-            <div class="item god"><span>🔥 DIOS</span><small>Épico/Legendario</small><button onclick="openBox('god')">1500 PC</button></div>
+            <div class="card common"><span>📦 BRONCE</span><button onclick="openBox('common')">100 PC</button></div>
+            <div class="card epic"><span>💎 ÉPICA</span><button onclick="openBox('epic')">500 PC</button></div>
+            <div class="card god"><span>🔥 DIOS</span><button onclick="openBox('god')">1500 PC</button></div>
         </div>
-        <button onclick="showUI('main')">VOLVER</button>
-    </div>
-
-    <!-- ANIMACIÓN DE CAJA -->
-    <div id="lootbox-opening" class="ui-overlay" style="display:none; background: rgba(0,0,0,0.95);">
-        <div class="box-anim-container">
-            <div id="box-sprite">📦</div>
-            <h2 id="opening-text">ABRIENDO...</h2>
-            <div id="reward-display" style="display:none">
-                <div id="reward-card" class="item"></div>
-                <button onclick="showUI('shop')" style="margin-top:20px">CONTINUAR</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- INVENTARIO -->
-    <div id="inventory-menu" class="ui-overlay" style="display:none">
-        <h2>MI COLECCIÓN</h2>
-        <div id="inventory-list" class="inventory-container"></div>
-        <button onclick="showUI('main')">VOLVER</button>
+        <button class="btn-back" onclick="showUI('main')">VOLVER</button>
     </div>
 
     <!-- PERFIL -->
     <div id="profile-menu" class="ui-overlay" style="display:none">
-        <h2>🔑 SESIÓN PORTABLE</h2>
+        <h2>PERFIL 2026</h2>
+        <input type="text" id="username-input" placeholder="Nombre de usuario">
+        <button onclick="saveUsername()">GUARDAR</button>
+        <hr>
+        <p>LLAVE MAESTRA:</p>
         <textarea id="save-code-output" readonly onclick="this.select()"></textarea>
-        <input type="text" id="load-code-input" placeholder="Pega tu llave aquí...">
-        <button onclick="loadFromCode()">ACCEDER</button>
-        <hr style="width:80%; margin:15px; border:0.5px solid #333;">
-        <input type="text" id="promo-input" placeholder="Código Promo...">
-        <button onclick="redeemPromo()">CANJEAR</button>
-        <button onclick="showUI('main')" style="margin-top:20px">VOLVER</button>
+        <input type="text" id="load-code-input" placeholder="Pegar llave aquí...">
+        <button onclick="loadFromCode()">CARGAR SESIÓN</button>
+        <button class="btn-back" onclick="showUI('main')">VOLVER</button>
+    </div>
+
+    <!-- GAME OVER -->
+    <div id="game-over" class="ui-overlay" style="display:none">
+        <h2 id="winner-text"></h2>
+        <button onclick="location.reload()">MENÚ PRINCIPAL</button>
     </div>
 
     <script src="game.js"></script>
