@@ -6,16 +6,13 @@ let ball, players = [], gameActive = false;
 let currentMode, isCPU, cpuDifficulty, isCaos;
 const keys = {};
 
-// --- BASE DE DATOS DE COSMÉTICOS (Actualizada) ---
 const allItems = {
-    'p_base': { name: 'Verde', color: '#00ff00', rarity: 'Común', type: 'paddle' },
-    'p_gold': { name: 'Oro', color: '#ffd700', rarity: 'Épico', type: 'paddle' },
-    'p_rainbow': { name: 'Gamer', color: 'RAINBOW', rarity: 'Legendario', type: 'paddle' },
-    
-    'b_base': { name: 'Blanca', color: '#ffffff', rarity: 'Común', type: 'ball', speedMult: 1.0 },
-    'b_fire': { name: 'Fuego', color: '#ff6600', rarity: 'Épico', type: 'ball', speedMult: 1.0 },
-    'b_ice': { name: 'Hielo', color: '#00ffff', rarity: 'Legendario', type: 'ball', speedMult: 1.3 }, // <-- ¡BOLA DE HIELO!
-    
+    'p_base': { name: 'Verde', color: '#00ff00', type: 'paddle' },
+    'p_gold': { name: 'Oro', color: '#ffd700', type: 'paddle' },
+    'p_rainbow': { name: 'Gamer', color: 'RAINBOW', type: 'paddle' },
+    'b_base': { name: 'Blanca', color: '#ffffff', type: 'ball', speedMult: 1.0 },
+    'b_fire': { name: 'Fuego', color: '#ff6600', type: 'ball', speedMult: 1.2 },
+    'b_ice': { name: 'Hielo', color: '#00ffff', type: 'ball', speedMult: 1.5 },
     'bg_black': { name: 'Oscuro', color: '#050505', type: 'bg' },
     'bg_purple': { name: 'Space', color: '#100020', type: 'bg' }
 };
@@ -26,97 +23,104 @@ let userData = JSON.parse(localStorage.getItem('pong_v2026')) || {
     inventory: ['p_base', 'b_base', 'bg_black']
 };
 
-// --- FUNCIONES GLOBALES PARA BOTONES (Evita que se pillen) ---
 window.updateUI = function() {
     document.getElementById("display-coins").innerText = userData.coins;
     document.getElementById("display-username").innerText = userData.username;
-    document.getElementById("save-code-output").value = btoa(JSON.stringify(userData));
     localStorage.setItem('pong_v2026', JSON.stringify(userData));
-}
+};
+
+window.showUI = function(menuId) {
+    // Cerramos todos los menús posibles
+    const screens = ['title-screen', 'main-menu', 'caos-select-menu', 'inventory-menu', 'shop-menu', 'profile-menu', 'game-over'];
+    screens.forEach(id => { if(document.getElementById(id)) document.getElementById(id).style.display = "none"; });
+    
+    // Abrimos el solicitado
+    if (menuId === 'none') return;
+    let target = menuId.includes('-menu') ? menuId : menuId + '-menu';
+    if (menuId === 'main') target = 'main-menu';
+    if (menuId === 'caos-select') target = 'caos-select-menu';
+    
+    const el = document.getElementById(target);
+    if(el) el.style.display = "flex";
+};
+
 window.enterGame = function() {
     document.getElementById("title-screen").style.display = "none";
     document.getElementById("top-bar").style.display = "flex";
     showUI('main');
-}
-window.showUI = function(menu) {
-    const screens = ['main-menu', 'shop-menu', 'inventory-menu', 'profile-menu', 'game-over', 'caos-select'];
-    screens.forEach(s => { if(document.getElementById(s + "-menu")) document.getElementById(s + "-menu").style.display = "none"; });
-    if (menu === 'inventory') populateInventory('paddle');
-    if (menu !== 'none') document.getElementById(menu + "-menu").style.display = "flex";
-}
+};
+
+window.openBox = function(tier) {
+    const prices = { common: 100, epic: 500, god: 1500 };
+    if (userData.coins < prices[tier]) return alert("Necesitas más PC");
+    
+    userData.coins -= prices[tier];
+    const ids = Object.keys(allItems);
+    const rewardId = ids[Math.floor(Math.random() * ids.length)];
+    
+    if (!userData.inventory.includes(rewardId)) {
+        userData.inventory.push(rewardId);
+        alert("¡NUEVO! Has obtenido: " + allItems[rewardId].name);
+    } else {
+        const refund = Math.floor(prices[tier] * 0.5);
+        userData.coins += refund;
+        alert("Repetido: " + allItems[rewardId].name + ". Se te devuelven " + refund + " PC");
+    }
+    updateUI();
+};
+
 window.populateInventory = function(type) {
     const list = document.getElementById("inventory-list");
     list.innerHTML = "";
     userData.inventory.filter(id => allItems[id].type === type).forEach(id => {
         const item = allItems[id];
-        const isEq = userData.equipped[item.type] === id;
-        list.innerHTML += `<div class="card ${isEq?'active':''}" onclick="equip('${id}', '${type}')"><div class="preview" style="background:${item.color==='RAINBOW'?'linear-gradient(red,blue)':item.color}"></div><p>${item.name}</p></div>`;
+        const isEq = userData.equipped[type] === id;
+        list.innerHTML += `<div class="card ${isEq?'active':''}" onclick="equip('${id}', '${type}')">
+            <div class="preview" style="background:${item.color==='RAINBOW'?'linear-gradient(to right,red,orange,yellow,green,blue,indigo,violet)':item.color}"></div>
+            <p>${item.name}</p>
+        </div>`;
     });
-}
+};
+
 window.equip = function(id, type) {
     userData.equipped[type] = id;
     updateUI(); populateInventory(type);
-}
-window.openBox = function(tier) {
-    const prices = { common: 100, epic: 500, god: 1500 };
-    if (userData.coins < prices[tier]) return alert("PC insuficientes");
-    userData.coins -= prices[tier];
-    const ids = Object.keys(allItems);
-    let rewardId = ids[Math.floor(Math.random() * ids.length)];
-    if (!userData.inventory.includes(rewardId)) userData.inventory.push(rewardId);
-    else userData.coins += Math.floor(prices[tier] * 0.4);
-    updateUI();
-    alert("¡Objeto recibido! Revisa tu colección.");
-}
+};
+
 window.startGame = function(mode, cpu, diff, caos) {
     currentMode = mode; isCPU = cpu; cpuDifficulty = diff; isCaos = caos;
     gameActive = true;
-    document.getElementById("top-bar").style.display = "none";
     showUI('none');
+    document.getElementById("top-bar").style.display = "none";
     canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-    initPlayers(); resetBall(1); 
-    requestAnimationFrame(loop); // <-- Usamos requestAnimationFrame para el loop principal
-}
+    initPlayers(); resetBall(1);
+    loop();
+};
 
-// --- LÓGICA DEL JUEGO ---
 function initPlayers() {
-    const pW = 15, pH = canvas.height * 0.18, mid = canvas.height/2 - pH/2;
-    let pCol = allItems[userData.equipped.paddle].color;
-    players = [];
-    players.push({ x: 40, y: mid, w: pW, h: pH, color: pCol==='RAINBOW'?'#fff':pCol, lives: 5, team: "V", up: "w", down: "s", ai: false });
-    if(currentMode === 2) players.push({ x: 120, y: mid, w: pW, h: pH, color: pCol==='RAINBOW'?'#fff':pCol, lives: 5, team: "V", up: "t", down: "g", ai: false });
-    if (isCPU) players.push({ x: canvas.width-55, y: mid, w: pW, h: pH, color: "#ff2244", lives: 5, team: "R", ai: true });
-    else {
-        if (currentMode === 1) players.push({ x: canvas.width-55, y: mid, w: pW, h: pH, color: "#ff2244", lives: 5, team: "R", up: "arrowup", down: "arrowdown", ai: false });
-        else { players.push({ x: canvas.width-55, y: mid, w: pW, h: pH, color: "#ff2244", lives: 5, team: "R", up: "i", down: "k", ai: false }); players.push({ x: canvas.width-135, y: mid, w: pW, h: pH, color: "#ff2244", lives: 5, team: "R", up: "arrowup", down: "arrowdown", ai: false }); }
-    }
+    const pH = canvas.height * 0.2, mid = canvas.height/2 - pH/2;
+    const pCol = allItems[userData.equipped.paddle].color === 'RAINBOW' ? '#fff' : allItems[userData.equipped.paddle].color;
+    players = [
+        { x: 30, y: mid, w: 20, h: pH, color: pCol, lives: 5, team: "V", up: "w", down: "s", ai: false },
+        { x: canvas.width - 50, y: mid, w: 20, h: pH, color: "#ff2244", lives: 5, team: "R", up: "arrowup", down: "arrowdown", ai: isCPU }
+    ];
 }
 
 function resetBall(dir) {
-    players.forEach(p => p.h = canvas.height * 0.18);
-    // Multiplicador de velocidad de la bola equipada
-    const equippedBall = allItems[userData.equipped.ball];
-    const speed = (canvas.width * 0.007) * (equippedBall.speedMult || 1.0);
-    
-    ball = { x: canvas.width/2, y: canvas.height/2, r: 10, dx: dir * speed, dy: (Math.random()-0.5)*10 };
-    if(isCaos) { 
-        ball.dx *= 1.6;
-        modDisplay.innerText = "¡MODO CAOS ACTIVO!"; 
-        setTimeout(() => modDisplay.innerText = "", 1500); 
-    }
+    const speed = (canvas.width * 0.008) * (allItems[userData.equipped.ball].speedMult || 1);
+    ball = { x: canvas.width/2, y: canvas.height/2, r: 12, dx: dir * speed, dy: (Math.random()-0.5)*10 };
 }
 
-function update() {
+function loop() {
     if (!gameActive) return;
-    
+    // Update
     players.forEach(p => {
-        if (p.ai) { p.y += (ball.y - (p.y + p.h/2)) * cpuDifficulty; } 
+        if (p.ai) p.y += (ball.y - (p.y + p.h/2)) * cpuDifficulty;
         else {
-            if (keys[p.up]) p.y -= 10;
-            if (keys[p.down]) p.y += 10;
+            if (keys[p.up]) p.y -= 12;
+            if (keys[p.down]) p.y += 12;
         }
-        if (p.y < 0) p.y = 0;
-        if (p.y > canvas.height - p.h) p.y = canvas.height - p.h;
+        p.y = Math.max(0, Math.min(canvas.height - p.h, p.y));
     });
 
     ball.x += ball.dx; ball.y += ball.dy;
@@ -124,51 +128,44 @@ function update() {
 
     players.forEach(p => {
         if (ball.x + ball.r > p.x && ball.x - ball.r < p.x + p.w && ball.y + ball.r > p.y && ball.y - ball.r < p.y + p.h) {
-            ball.dx *= -1.05;
-            ball.x = (ball.dx > 0) ? p.x + p.w + 5 : p.x - ball.r - 5;
-            ball.dy += (Math.random()-0.5)*5;
+            ball.dx *= -1.1;
+            ball.x = ball.dx > 0 ? p.x + p.w + 2 : p.x - ball.r - 2;
         }
     });
 
-    if (ball.x < 0) score("R"); if (ball.x > canvas.width) score("V");
-}
+    if (ball.x < 0) score("R");
+    if (ball.x > canvas.width) score("V");
 
-function render() {
+    // Render
     ctx.fillStyle = allItems[userData.equipped.bg].color;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    ctx.shadowBlur = 15;
-    players.forEach(p => { 
-        ctx.fillStyle = p.color; 
-        ctx.shadowColor = p.color;
-        ctx.fillRect(p.x, p.y, p.w, p.h); 
-    });
-    
-    ctx.fillStyle = allItems[userData.equipped.ball].color;
-    ctx.shadowColor = "#fff";
+    players.forEach(p => { ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, p.w, p.h); });
+    ctx.fillStyle = allItems[userData.equipped.ball].color === 'RAINBOW' ? '#fff' : allItems[userData.equipped.ball].color;
     ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI*2); ctx.fill();
-    ctx.shadowBlur = 0;
-}
+    
+    // Dibujar Vidas en Canvas
+    ctx.fillStyle = "white"; ctx.font = "bold 30px Arial";
+    ctx.fillText("VIDAS: " + players[0].lives, 50, 50);
+    ctx.fillText("VIDAS: " + players[1].lives, canvas.width - 200, 50);
 
-function score(t) {
-    players.filter(p => p.team !== t).forEach(p => p.lives--);
-    if (players.some(p => p.lives <= 0)) {
-        gameActive = false; userData.coins += 50; updateUI();
-        document.getElementById("top-bar").style.display = "flex";
-        showUI('game-over');
-        document.getElementById("winner-text").innerText = t === "V" ? "GANÓ EQUIPO VERDE" : "GANÓ EQUIPO ROJO";
-    } else resetBall(t === "V" ? -1 : 1);
-}
-
-function loop() {
-    if (!gameActive) return;
-    update();
-    render();
     requestAnimationFrame(loop);
 }
-// Fin de funciones del juego
-window.saveUsername = function() { /* ... */ const val = document.getElementById("username-input").value; if(val){userData.username=val;updateUI();alert("Nombre guardado.");}};
-window.loadFromCode = function() { /* ... */ try{userData=JSON.parse(atob(document.getElementById("load-code-input").value));updateUI();alert("Sesión Cargada.");}catch(e){alert("Error.");}};
+
+function score(winnerTeam) {
+    if(winnerTeam === "V") players[1].lives--;
+    else players[0].lives--;
+
+    if (players[0].lives <= 0 || players[1].lives <= 0) {
+        gameActive = false;
+        userData.coins += 100;
+        updateUI();
+        document.getElementById("winner-text").innerText = players[0].lives <= 0 ? "GANÓ EL ROJO" : "GANÓ EL VERDE";
+        showUI('game-over');
+    } else {
+        resetBall(winnerTeam === "V" ? -1 : 1);
+    }
+}
+
 window.addEventListener("keydown", e => keys[e.key.toLowerCase()] = true);
 window.addEventListener("keyup", e => keys[e.key.toLowerCase()] = false);
 updateUI();
