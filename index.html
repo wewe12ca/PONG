@@ -24,6 +24,7 @@
     <div id="title-screen" class="ui-overlay">
         <h1 class="logo">PONG <span class="accent">2D</span></h1>
         <button class="btn-primary" onclick="enterGame()">EMPEZAR JUEGO</button>
+        <p class="hint">VERSIÓN 2026</p>
     </div>
 
     <!-- MENÚ PRINCIPAL -->
@@ -56,6 +57,7 @@
                 <div class="loot-card" onclick="openBox('epic')">💎 Épica<br>500 PC</div>
                 <div class="loot-card god-box" onclick="openBox('god')">🔥 DIOS<br>1500 PC</div>
             </div>
+            <p style="font-size: 0.8em; color: #aaa;">* Hielo y Fuego solo en Caja DIOS</p>
             <button onclick="showUI('main')">VOLVER</button>
         </div>
     </div>
@@ -77,9 +79,11 @@
     <div id="profile-menu" class="ui-overlay" style="display:none">
         <div class="window">
             <h2>RECUPERACIÓN</h2>
-            <input type="text" id="load-code-input" placeholder="Pegar código...">
+            <input type="text" id="load-code-input" placeholder="Pegar código de recuperación...">
             <button onclick="loadFromCode()">CARGAR DATOS</button>
-            <textarea id="save-code-output" readonly></textarea>
+            <hr>
+            <p>TU LLAVE DE ACCESO:</p>
+            <textarea id="save-code-output" readonly onclick="this.select()"></textarea>
             <button onclick="showUI('main')">VOLVER</button>
         </div>
     </div>
@@ -89,7 +93,7 @@
         <div class="window">
             <h1>PAUSA</h1>
             <button class="btn-primary" onclick="resumeGame()">REANUDAR</button>
-            <button onclick="location.reload()">SALIR</button>
+            <button onclick="location.reload()">MENU PRINCIPAL</button>
         </div>
     </div>
 
