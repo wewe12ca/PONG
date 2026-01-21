@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- HUD SUPERIOR -->
     <div id="top-bar" style="display:none">
         <div class="user-info">👤 <span id="display-username">Jugador</span></div>
         <div class="coin-info">💰 <span id="display-coins">0</span> PC</div>
@@ -23,15 +24,16 @@
     <div id="title-screen" class="ui-overlay">
         <h1 class="logo">PONG <span class="accent">2D</span></h1>
         <button class="btn-primary" onclick="enterGame()">EMPEZAR JUEGO</button>
+        <p class="hint">VERSIÓN 2026</p>
     </div>
 
     <!-- MENÚ PRINCIPAL -->
     <div id="main-menu" class="ui-overlay" style="display:none">
         <div class="window">
-            <h2>MODOS NORMALES</h2>
+            <h2>MODOS DE JUEGO</h2>
             <div class="grid-modes">
                 <button onclick="startGame(1, false, 0, false)">1 VS 1</button>
-                <button onclick="startGame(1, true, 0.15, false)">VS CPU</button>
+                <button onclick="startGame(1, true, 0.15, false)">VS CPU PRO</button>
                 <button onclick="showUI('caos-select')" class="btn-caos">MODO CAOS 🔥</button>
             </div>
         </div>
@@ -41,7 +43,7 @@
     <div id="caos-select-menu" class="ui-overlay" style="display:none">
         <div class="window">
             <h2 class="caos-text">ELIGE MODO CAOS</h2>
-            <button onclick="startGame(1, false, 0, true)">1 VS 1 CAOS</button>
+            <button onclick="startGame(1, false, 0, true)">1 VS 1 CAOS</button><br><br>
             <button onclick="showUI('main')">VOLVER</button>
         </div>
     </div>
@@ -49,12 +51,13 @@
     <!-- TIENDA -->
     <div id="shop-menu" class="ui-overlay" style="display:none">
         <div class="window">
-            <h2>CAJAS 2026</h2>
+            <h2>CAJAS DE SUMINISTROS</h2>
             <div class="shop-grid">
                 <div class="loot-card" onclick="openBox('common')">📦 Bronce<br>100 PC</div>
                 <div class="loot-card" onclick="openBox('epic')">💎 Épica<br>500 PC</div>
-                <div class="loot-card god" onclick="openBox('god')">🔥 DIOS<br>1500 PC</div>
+                <div class="loot-card god-box" onclick="openBox('god')">🔥 DIOS<br>1500 PC</div>
             </div>
+            <p style="font-size: 0.8em; color: #aaa;">* Hielo y Fuego solo en Caja DIOS</p>
             <button onclick="showUI('main')">VOLVER</button>
         </div>
     </div>
@@ -75,11 +78,12 @@
     <!-- PERFIL -->
     <div id="profile-menu" class="ui-overlay" style="display:none">
         <div class="window">
-            <h2>RECUPERACIÓN</h2>
-            <input type="text" id="load-code-input" placeholder="Pegar código aquí...">
-            <button onclick="loadFromCode()">CARGAR SESIÓN</button>
-            <p>TU LLAVE ACTUAL:</p>
-            <textarea id="save-code-output" readonly></textarea>
+            <h2>RECUPERACIÓN 2026</h2>
+            <input type="text" id="load-code-input" placeholder="Pegar código de recuperación...">
+            <button onclick="loadFromCode()">CARGAR DATOS</button>
+            <hr>
+            <p>TU LLAVE DE ACCESO:</p>
+            <textarea id="save-code-output" readonly onclick="this.select()"></textarea>
             <button onclick="showUI('main')">VOLVER</button>
         </div>
     </div>
@@ -89,7 +93,7 @@
         <div class="window">
             <h1>PAUSA</h1>
             <button class="btn-primary" onclick="resumeGame()">REANUDAR</button>
-            <button onclick="location.reload()">SALIR</button>
+            <button onclick="location.reload()">MENU PRINCIPAL</button>
         </div>
     </div>
 
@@ -98,8 +102,8 @@
         <div class="window">
             <h1 id="winner-text">FIN</h1>
             <p id="reward-text"></p>
-            <button class="btn-primary" onclick="restartGame()">VOLVER A JUGAR</button>
-            <button onclick="location.reload()">MENÚ PRINCIPAL</button>
+            <button class="btn-primary" onclick="restartGame()">JUGAR DE NUEVO</button>
+            <button onclick="location.reload()">MENU PRINCIPAL</button>
         </div>
     </div>
 
