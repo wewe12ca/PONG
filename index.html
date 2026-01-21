@@ -2,41 +2,44 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>PONG 2D | ULTIMATE EDITION</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PONG 2D | ULTIMATE EDITION 2026</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
+    <!-- HUD SUPERIOR (Siempre visible en menús) -->
+    <div id="top-bar" style="display:none">
+        <div class="user-info">👤 <span id="display-username">Jugador</span></div>
+        <div class="coin-info">💰 <span id="display-coins">0</span> PC</div>
+        <div class="nav-btns">
+            <button onclick="showUI('shop')">🛒 Tienda</button>
+            <button onclick="showUI('inventory')">🎒 Colección</button>
+            <button onclick="showUI('profile')">⚙️ Perfil</button>
+        </div>
+    </div>
+
     <!-- PORTADA DINÁMICA -->
     <div id="title-screen" class="ui-overlay">
         <h1 class="logo">PONG <span class="accent">2D</span></h1>
         <div class="hero-box">
             <button class="btn-primary" onclick="enterGame()">EMPEZAR JUEGO</button>
-            <p class="hint">EDICIÓN 2026</p>
+            <p class="hint">EDICIÓN GLOBAL 2026</p>
         </div>
     </div>
 
-    <!-- HUD SUPERIOR -->
-    <div id="top-bar" style="display:none">
-        <div class="user-info">👤 <span id="display-username">Jugador</span></div>
-        <div class="coin-info">💰 <span id="display-coins">0</span> PC</div>
-        <div class="nav-btns">
-            <button onclick="showUI('shop')">Tienda</button>
-            <button onclick="showUI('inventory')">Colección</button>
-            <button onclick="showUI('profile')">Perfil</button>
-        </div>
-    </div>
-
+    <!-- CANVAS DEL JUEGO -->
     <canvas id="pong"></canvas>
     <div id="mod-display" class="mod-indicator"></div>
 
     <!-- MENÚ PRINCIPAL -->
     <div id="main-menu" class="ui-overlay" style="display:none">
-        <div class="menu-card">
-            <h2>MODO NORMAL</h2>
+        <div class="menu-card window">
+            <h2>MODOS DE COMBATE</h2>
             <div class="grid-modes">
                 <button onclick="startGame(1, false, 0, false)">1 VS 1 Local</button>
                 <button onclick="startGame(2, false, 0, false)">2 VS 2 Local</button>
-                <button onclick="startGame(1, true, 0.12, false)">VS CPU PRO</button>
+                <button onclick="startGame(1, true, 0.15, false)">VS CPU PRO</button>
                 <button onclick="showUI('caos-select')" class="btn-caos">MODO CAOS 🔥</button>
             </div>
         </div>
@@ -44,8 +47,8 @@
 
     <!-- SUBMENÚ CAOS -->
     <div id="caos-select-menu" class="ui-overlay" style="display:none">
-        <div class="menu-card caos-border">
-            <h2 class="caos-text">ELIGE MODO CAOS</h2>
+        <div class="menu-card window caos-border">
+            <h2 class="caos-text">ELIGE TU DESTINO</h2>
             <div class="grid-modes">
                 <button onclick="startGame(1, false, 0, true)">1 VS 1 CAOS</button>
                 <button onclick="startGame(2, false, 0, true)">2 VS 2 CAOS</button>
@@ -54,48 +57,67 @@
         </div>
     </div>
 
-    <!-- INVENTARIO POR PESTAÑAS -->
+    <!-- INVENTARIO -->
     <div id="inventory-menu" class="ui-overlay" style="display:none">
         <div class="window">
+            <h2>MI COLECCIÓN</h2>
             <div class="tabs">
                 <button onclick="populateInventory('paddle')">Palas</button>
                 <button onclick="populateInventory('ball')">Bolas</button>
                 <button onclick="populateInventory('bg')">Fondos</button>
             </div>
-            <div id="inventory-list" class="item-grid"></div>
-            <button class="btn-close" onclick="showUI('main')">CERRAR</button>
+            <div id="inventory-list" class="item-grid">
+                <!-- Se llena con JS -->
+            </div>
+            <button class="btn-close" onclick="showUI('main')">VOLVER AL MENÚ</button>
         </div>
     </div>
 
-    <!-- TIENDA -->
+    <!-- TIENDA DE CAJAS -->
     <div id="shop-menu" class="ui-overlay" style="display:none">
         <div class="window">
-            <h2>CAJAS DE SUMINISTROS</h2>
+            <h2>SUMINISTROS 2026</h2>
             <div class="shop-grid">
-                <div class="loot-card bronze" onclick="openBox('common')">📦 Bronce<br><b>100 PC</b></div>
-                <div class="loot-card epic" onclick="openBox('epic')">💎 Épica<br><b>500 PC</b></div>
-                <div class="loot-card legendary" onclick="openBox('god')">🔥 Dios<br><b>1500 PC</b></div>
+                <div class="loot-card bronze" onclick="openBox('common')">
+                    <p>📦 Bronce</p>
+                    <b>100 PC</b>
+                </div>
+                <div class="loot-card epic" onclick="openBox('epic')">
+                    <p>💎 Épica</p>
+                    <b>500 PC</b>
+                </div>
+                <div class="loot-card legendary" onclick="openBox('god')">
+                    <p>🔥 Dios</p>
+                    <b>1500 PC</b>
+                </div>
+            </div>
+            <button class="btn-close" onclick="showUI('main')">SALIR</button>
+        </div>
+    </div>
+
+    <!-- PERFIL Y GUARDADO -->
+    <div id="profile-menu" class="ui-overlay" style="display:none">
+        <div class="window">
+            <h2>DATOS DEL PILOTO</h2>
+            <div class="profile-content">
+                <input type="text" id="username-input" placeholder="Nuevo apodo...">
+                <button class="btn-primary" onclick="saveUsername()">CAMBIAR NOMBRE</button>
+                <hr>
+                <p>CÓDIGO DE RECUPERACIÓN:</p>
+                <textarea id="save-code-output" readonly onclick="this.select()"></textarea>
+                <p style="font-size: 0.8em; color: gray;">Copia este código para no perder tus monedas.</p>
             </div>
             <button class="btn-close" onclick="showUI('main')">VOLVER</button>
         </div>
     </div>
 
-    <!-- PERFIL -->
-    <div id="profile-menu" class="ui-overlay" style="display:none">
-        <div class="window">
-            <h2>MI CUENTA</h2>
-            <input type="text" id="username-input" placeholder="Nuevo nombre...">
-            <button onclick="saveUsername()">ACTUALIZAR</button>
-            <p>LLAVE DE ACCESO:</p>
-            <textarea id="save-code-output" readonly onclick="this.select()"></textarea>
-            <button class="btn-close" onclick="showUI('main')">VOLVER</button>
-        </div>
-    </div>
-
-    <!-- GAME OVER -->
+    <!-- PANTALLA DE DERROTA/VICTORIA -->
     <div id="game-over" class="ui-overlay" style="display:none">
-        <h1 id="winner-text">GANASTE</h1>
-        <button class="btn-primary" onclick="location.reload()">CONTINUAR</button>
+        <div class="window">
+            <h1 id="winner-text">FIN DE LA PARTIDA</h1>
+            <p>Has recibido 100 PC por participar.</p>
+            <button class="btn-primary" onclick="location.reload()">VOLVER A EMPEZAR</button>
+        </div>
     </div>
 
     <script src="game.js"></script>
