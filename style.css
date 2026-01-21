@@ -1,14 +1,16 @@
 :root { --primary: #00ff88; --secondary: #ff2244; --bg: #050505; }
-body { margin: 0; background: var(--bg); color: white; font-family: sans-serif; overflow: hidden; }
-canvas { display: block; }
+body { margin: 0; background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
+canvas { display: block; background: #000; }
 .ui-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; }
 #top-bar { position: fixed; top: 0; width: 100%; height: 60px; background: #111; display: flex; align-items: center; justify-content: space-around; border-bottom: 2px solid var(--primary); z-index: 200; }
-.window { background: #1a1a1a; padding: 30px; border-radius: 15px; border: 2px solid var(--primary); text-align: center; min-width: 350px; }
-.grid-modes, .shop-grid, .item-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 20px 0; }
-button { padding: 12px; cursor: pointer; border: none; border-radius: 5px; font-weight: bold; background: #333; color: white; }
+.window { background: #1a1a1a; padding: 25px; border-radius: 15px; border: 2px solid var(--primary); text-align: center; min-width: 350px; }
+.grid-modes, .shop-grid, .item-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 15px 0; }
+button { padding: 12px; cursor: pointer; border: none; border-radius: 5px; font-weight: bold; background: #333; color: white; transition: 0.3s; }
+button:hover { transform: scale(1.05); background: #444; }
 .btn-primary { background: var(--primary); color: black; }
-.btn-caos { background: var(--secondary); }
-.loot-card { background: #252525; padding: 15px; border-radius: 8px; cursor: pointer; }
-.god { border: 1px solid gold; color: gold; }
-.preview { width: 40px; height: 40px; margin: 0 auto; border-radius: 5px; }
-textarea { width: 100%; height: 50px; background: #000; color: var(--primary); margin-top: 10px; }
+.btn-caos { background: var(--secondary); box-shadow: 0 0 10px var(--secondary); }
+.loot-card { background: #252525; padding: 15px; border-radius: 8px; cursor: pointer; border: 1px solid #444; }
+.god-box { border: 1px solid #ffd700; color: #ffd700; box-shadow: 0 0 10px #ffd700; }
+.preview { width: 40px; height: 40px; margin: 0 auto 5px; border-radius: 5px; border: 1px solid #555; }
+textarea { width: 100%; height: 60px; background: #000; color: var(--primary); margin-top: 10px; resize: none; font-size: 10px; }
+input { padding: 10px; width: 80%; background: #222; border: 1px solid var(--primary); color: white; margin-bottom: 10px; }
