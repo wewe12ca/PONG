@@ -1,25 +1,108 @@
-<!-- Añadir esto dentro del body, debajo de los otros menús -->
-<div id="pause-menu" class="ui-overlay" style="display:none; background: rgba(0,0,0,0.5);">
-    <div class="window">
-        <h1 class="caos-text">PAUSA</h1>
-        <button class="btn-primary" onclick="resumeGame()">REANUDAR</button>
-        <button onclick="location.reload()">SALIR AL MENÚ</button>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>PONG 2D | ULTIMATE EDITION 2026</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="top-bar" style="display:none">
+        <div class="user-info">👤 <span id="display-username">Jugador</span></div>
+        <div class="coin-info">💰 <span id="display-coins">0</span> PC</div>
+        <div class="nav-btns">
+            <button onclick="showUI('shop')">Tienda</button>
+            <button onclick="showUI('inventory')">Colección</button>
+            <button onclick="showUI('profile')">Perfil</button>
+        </div>
     </div>
-</div>
 
-<!-- En el profile-menu, añade el input para cargar -->
-<div id="profile-menu" class="ui-overlay" style="display:none">
-    <div class="window">
-        <h2>DATOS DEL PILOTO</h2>
-        <input type="text" id="username-input" placeholder="Nuevo apodo...">
-        <button onclick="saveUsername()">CAMBIAR NOMBRE</button>
-        <hr>
-        <p>RECUPERAR CUENTA:</p>
-        <input type="text" id="load-code-input" placeholder="Pega tu código aquí...">
-        <button onclick="loadFromCode()">CARGAR SESIÓN</button>
-        <hr>
-        <p>TU LLAVE ACTUAL:</p>
-        <textarea id="save-code-output" readonly onclick="this.select()"></textarea>
-        <button class="btn-close" onclick="showUI('main')">VOLVER</button>
+    <canvas id="pong"></canvas>
+    <div id="mod-display" class="mod-indicator"></div>
+
+    <!-- PORTADA -->
+    <div id="title-screen" class="ui-overlay">
+        <h1 class="logo">PONG <span class="accent">2D</span></h1>
+        <button class="btn-primary" onclick="enterGame()">EMPEZAR JUEGO</button>
     </div>
-</div>
+
+    <!-- MENÚ PRINCIPAL -->
+    <div id="main-menu" class="ui-overlay" style="display:none">
+        <div class="window">
+            <h2>MODOS NORMALES</h2>
+            <div class="grid-modes">
+                <button onclick="startGame(1, false, 0, false)">1 VS 1</button>
+                <button onclick="startGame(1, true, 0.15, false)">VS CPU</button>
+                <button onclick="showUI('caos-select')" class="btn-caos">MODO CAOS 🔥</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SUBMENÚ CAOS -->
+    <div id="caos-select-menu" class="ui-overlay" style="display:none">
+        <div class="window">
+            <h2 class="caos-text">ELIGE MODO CAOS</h2>
+            <button onclick="startGame(1, false, 0, true)">1 VS 1 CAOS</button>
+            <button onclick="showUI('main')">VOLVER</button>
+        </div>
+    </div>
+
+    <!-- TIENDA -->
+    <div id="shop-menu" class="ui-overlay" style="display:none">
+        <div class="window">
+            <h2>CAJAS 2026</h2>
+            <div class="shop-grid">
+                <div class="loot-card" onclick="openBox('common')">📦 Bronce<br>100 PC</div>
+                <div class="loot-card" onclick="openBox('epic')">💎 Épica<br>500 PC</div>
+                <div class="loot-card god" onclick="openBox('god')">🔥 DIOS<br>1500 PC</div>
+            </div>
+            <button onclick="showUI('main')">VOLVER</button>
+        </div>
+    </div>
+
+    <!-- INVENTARIO -->
+    <div id="inventory-menu" class="ui-overlay" style="display:none">
+        <div class="window">
+            <div class="tabs">
+                <button onclick="populateInventory('paddle')">Palas</button>
+                <button onclick="populateInventory('ball')">Bolas</button>
+                <button onclick="populateInventory('bg')">Fondos</button>
+            </div>
+            <div id="inventory-list" class="item-grid"></div>
+            <button onclick="showUI('main')">CERRAR</button>
+        </div>
+    </div>
+
+    <!-- PERFIL -->
+    <div id="profile-menu" class="ui-overlay" style="display:none">
+        <div class="window">
+            <h2>RECUPERACIÓN</h2>
+            <input type="text" id="load-code-input" placeholder="Pegar código aquí...">
+            <button onclick="loadFromCode()">CARGAR SESIÓN</button>
+            <p>TU LLAVE ACTUAL:</p>
+            <textarea id="save-code-output" readonly></textarea>
+            <button onclick="showUI('main')">VOLVER</button>
+        </div>
+    </div>
+
+    <!-- PAUSA -->
+    <div id="pause-menu" class="ui-overlay" style="display:none">
+        <div class="window">
+            <h1>PAUSA</h1>
+            <button class="btn-primary" onclick="resumeGame()">REANUDAR</button>
+            <button onclick="location.reload()">SALIR</button>
+        </div>
+    </div>
+
+    <!-- GAME OVER -->
+    <div id="game-over" class="ui-overlay" style="display:none">
+        <div class="window">
+            <h1 id="winner-text">FIN</h1>
+            <p id="reward-text"></p>
+            <button class="btn-primary" onclick="restartGame()">VOLVER A JUGAR</button>
+            <button onclick="location.reload()">MENÚ PRINCIPAL</button>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
