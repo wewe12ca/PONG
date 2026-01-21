@@ -1,11 +1,206 @@
-:root { --primary: #00ff88; --secondary: #ff2244; --bg: #050505; }
-body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: var(--bg); color: white; font-family: sans-serif; overflow: hidden; }
-.ui-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; }
-#top-bar { position: fixed; top: 0; width: 100%; height: 60px; background: #111; display: flex; align-items: center; justify-content: space-around; border-bottom: 2px solid var(--primary); z-index: 200; }
-.window { background: #1a1a1a; padding: 25px; border-radius: 15px; border: 1px solid var(--primary); text-align: center; min-width: 320px; }
-.item-grid, .shop-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 15px 0; }
-.card, .loot-card { background: #252525; padding: 10px; border-radius: 8px; cursor: pointer; border: 1px solid transparent; }
-.card.active { border-color: var(--primary); background: #003311; }
-button { padding: 10px 15px; cursor: pointer; font-weight: bold; border-radius: 5px; border: none; }
-.btn-primary { background: var(--primary); }
-.hud-lives { position: fixed; top: 70px; width: 100%; display: flex; justify-content: space-between; padding: 0 50px; box-sizing: border-box; font-size: 1.5rem; font-weight: bold; pointer-events: none; text-shadow: 0 0 10px #000; }
+/* --- VARIABLES Y BASES --- */
+:root {
+    --primary: #00ff88;    /* Verde Neón */
+    --secondary: #ff2244;  /* Rojo Caos */
+    --accent: #00d4ff;     /* Azul Eléctrico */
+    --bg: #080808;
+    --card: #151515;
+    --text: #ffffff;
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: 'Orbitron', 'Segoe UI', sans-serif; /* Si puedes, añade Orbitron de Google Fonts */
+    overflow: hidden;
+}
+
+/* --- LIENZO DE JUEGO --- */
+#pong {
+    display: block;
+    background: radial-gradient(circle, #111 0%, #000 100%);
+}
+
+/* --- INTERFAZ DE USUARIO (OVERLAYS) --- */
+.ui-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+}
+
+/* HUD SUPERIOR */
+#top-bar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    height: 70px;
+    background: rgba(20, 20, 20, 0.95);
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    border-bottom: 2px solid var(--primary);
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+    z-index: 200;
+}
+
+.user-info, .coin-info {
+    font-size: 1.1rem;
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+/* VENTANAS MODALES */
+.window {
+    background: var(--card);
+    padding: 40px;
+    border-radius: 20px;
+    border: 2px solid var(--primary);
+    box-shadow: 0 0 40px rgba(0, 0, 0, 1), inset 0 0 10px rgba(0, 255, 136, 0.1);
+    text-align: center;
+    min-width: 350px;
+    max-width: 90%;
+}
+
+/* BOTONES */
+button {
+    background: #222;
+    color: white;
+    border: 1px solid #444;
+    padding: 12px 24px;
+    margin: 8px;
+    border-radius: 8px;
+    font-weight: bold;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+button:hover {
+    background: #333;
+    transform: translateY(-2px);
+    border-color: var(--primary);
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: black;
+    border: none;
+    font-size: 1.1rem;
+}
+
+.btn-primary:hover {
+    background: #00cc6e;
+    box-shadow: 0 0 20px var(--primary);
+}
+
+.btn-caos {
+    background: var(--secondary);
+    border: none;
+    animation: pulse-red 2s infinite;
+}
+
+@keyframes pulse-red {
+    0% { box-shadow: 0 0 0px var(--secondary); }
+    50% { box-shadow: 0 0 20px var(--secondary); }
+    100% { box-shadow: 0 0 0px var(--secondary); }
+}
+
+/* TIENDA E INVENTARIO */
+.grid-modes, .shop-grid, .item-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin: 25px 0;
+}
+
+.card, .loot-card {
+    background: #1a1a1a;
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid #333;
+    transition: 0.3s;
+}
+
+.card:hover, .loot-card:hover {
+    border-color: var(--accent);
+    background: #222;
+}
+
+.card.active {
+    border-color: var(--primary);
+    background: rgba(0, 255, 136, 0.1);
+}
+
+.preview {
+    width: 50px;
+    height: 50px;
+    margin: 0 auto 10px;
+    border-radius: 8px;
+    border: 2px solid rgba(255,255,255,0.1);
+}
+
+/* PERFIL Y CÓDIGOS */
+textarea, input[type="text"] {
+    width: 100%;
+    background: #000;
+    color: var(--primary);
+    border: 1px solid #444;
+    padding: 10px;
+    border-radius: 5px;
+    margin: 10px 0;
+    font-family: monospace;
+    text-align: center;
+}
+
+textarea {
+    height: 60px;
+    resize: none;
+    font-size: 0.7rem;
+}
+
+/* EFECTOS ESPECIALES */
+.logo {
+    font-size: 5rem;
+    margin-bottom: 20px;
+    text-shadow: 0 0 30px var(--primary);
+}
+
+.accent { color: var(--primary); }
+.caos-text { color: var(--secondary); text-shadow: 0 0 15px var(--secondary); }
+
+.mod-indicator {
+    position: fixed;
+    top: 100px;
+    width: 100%;
+    text-align: center;
+    font-size: 2.5rem;
+    color: var(--secondary);
+    font-weight: bold;
+    pointer-events: none;
+    text-shadow: 0 0 20px black;
+}
+
+/* PESTAÑAS DEL INVENTARIO */
+.tabs {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 15px;
+}
+
+.tabs button {
+    padding: 8px 15px;
+    font-size: 0.8rem;
+}
