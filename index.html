@@ -2,15 +2,16 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>PONG ULTIMATE 2026</title>
+    <title>PONG ULTIMATE 2026 | FINAL EDITION</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="bg-animation"><div id="particles"></div></div>
 
+    <!-- HUD SUPERIOR -->
     <div id="top-bar">
         <div class="stat-group">
-            <div class="user-pill">👤 <span id="display-username">Cargando...</span></div>
+            <div class="user-pill">👤 <span id="display-username">Invitado</span></div>
             <div class="coin-pill">💰 <span id="display-coins">0</span> PC</div>
         </div>
         <div class="nav-btns">
@@ -24,19 +25,44 @@
         <canvas id="pong"></canvas>
 
         <div id="ui-layer">
-            <div id="title-screen" class="ui-overlay active">
-                <h1 class="logo">PONG<span class="accent">2D</span></h1>
-                <button class="btn-main" onclick="showUI('main')">EMPEZAR</button>
+            <!-- REGISTRO DE CUENTA -->
+            <div id="register-screen" class="ui-overlay">
+                <div class="window">
+                    <h2 class="neon-text">NUEVO PILOTO</h2>
+                    <input type="text" id="username-input" placeholder="Tu nombre...">
+                    <button class="btn-main" onclick="App.createAccount()">CREAR PERFIL</button>
+                </div>
             </div>
 
+            <!-- PORTADA -->
+            <div id="title-screen" class="ui-overlay active">
+                <h1 class="logo">PONG<span class="accent">2D</span></h1>
+                <button class="btn-main" onclick="App.checkSession()">ENTRAR</button>
+            </div>
+
+            <!-- MENÚ PRINCIPAL -->
             <div id="main-menu" class="ui-overlay">
                 <div class="window">
                     <h2 class="neon-text">MODOS DE JUEGO</h2>
-                    <button class="btn-mode" onclick="startGame(false)">1 VS 1</button>
+                    <button class="btn-mode" onclick="startGame(false)">1 VS 1 LOCAL</button>
                     <button class="btn-mode" onclick="startGame(true)">VS CPU PRO</button>
                 </div>
             </div>
 
+            <!-- TIENDA DE LOOTBOXES -->
+            <div id="shop-menu" class="ui-overlay">
+                <div class="window">
+                    <h2 class="neon-text">SUMINISTROS</h2>
+                    <div class="shop-grid">
+                        <div class="loot-card" onclick="App.openBox('common')">📦 BRONCE<br><small>100 PC</small></div>
+                        <div class="loot-card" onclick="App.openBox('epic')">💎 ÉPICA<br><small>500 PC</small></div>
+                        <div class="loot-card god-box" onclick="App.openBox('god')">🔥 DIOS<br><small>1500 PC</small></div>
+                    </div>
+                    <button onclick="showUI('main')">VOLVER</button>
+                </div>
+            </div>
+
+            <!-- INVENTARIO -->
             <div id="inventory-menu" class="ui-overlay">
                 <div class="window">
                     <div class="tabs">
@@ -48,18 +74,20 @@
                 </div>
             </div>
 
+            <!-- PERFIL / CÓDIGOS -->
             <div id="profile-menu" class="ui-overlay">
                 <div class="window">
-                    <h2>CÓDIGOS PROMOCIONALES</h2>
-                    <input type="text" id="promo-input" placeholder="Introduce código...">
+                    <h2>PROMOCIONES</h2>
+                    <input type="text" id="promo-input" placeholder="Código...">
                     <button onclick="App.redeemCode()">CANJEAR</button>
                     <hr>
-                    <p>TU CÓDIGO DE RECUPERACIÓN:</p>
+                    <p>KEY DE RECUPERACIÓN:</p>
                     <textarea id="save-code-output" readonly></textarea>
                     <button onclick="showUI('main')">VOLVER</button>
                 </div>
             </div>
 
+            <!-- GAME OVER -->
             <div id="game-over" class="ui-overlay">
                 <div class="window gold-border">
                     <h1 id="winner-text">FIN</h1>
@@ -69,7 +97,6 @@
             </div>
         </div>
     </main>
-
     <script src="game.js"></script>
 </body>
 </html>
