@@ -2,20 +2,16 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>PONG 2D | ULTIMATE 2026</title>
+    <title>PONG ULTIMATE 2026</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- FONDO ANIMADO -->
-    <div class="bg-animation">
-        <div id="particles"></div>
-    </div>
+    <div class="bg-animation"><div id="particles"></div></div>
 
-    <!-- HUD SUPERIOR -->
     <div id="top-bar">
         <div class="stat-group">
-            <div class="user-pill">👤 <span id="display-username">Jugador</span></div>
-            <div class="coin-pill">💰 <span id="display-coins">0</span> <small>PC</small></div>
+            <div class="user-pill">👤 <span id="display-username">Cargando...</span></div>
+            <div class="coin-pill">💰 <span id="display-coins">0</span> PC</div>
         </div>
         <div class="nav-btns">
             <button onclick="showUI('shop')">TIENDA</button>
@@ -26,50 +22,49 @@
 
     <main id="game-area">
         <canvas id="pong"></canvas>
-        <div id="mod-display" class="mod-indicator"></div>
 
-        <!-- PANTALLAS UI (SE SUPERPONEN AL CANVAS) -->
-        <div id="ui-container">
-            <!-- Portada -->
+        <div id="ui-layer">
             <div id="title-screen" class="ui-overlay active">
                 <h1 class="logo">PONG<span class="accent">2D</span></h1>
-                <div class="glow-bar"></div>
-                <button class="btn-main" onclick="showUI('main')">ENTRAR AL SISTEMA</button>
+                <button class="btn-main" onclick="showUI('main')">EMPEZAR</button>
             </div>
 
-            <!-- Menú Modos -->
             <div id="main-menu" class="ui-overlay">
                 <div class="window">
                     <h2 class="neon-text">MODOS DE JUEGO</h2>
-                    <div class="mode-grid">
-                        <button class="btn-mode" onclick="startGame(1, false)">1 VS 1</button>
-                        <button class="btn-mode" onclick="startGame(1, true)">VS CPU PRO</button>
-                        <button class="btn-mode chaos" onclick="showUI('caos-select')">MODO CAOS 🔥</button>
-                    </div>
+                    <button class="btn-mode" onclick="startGame(false)">1 VS 1</button>
+                    <button class="btn-mode" onclick="startGame(true)">VS CPU PRO</button>
                 </div>
             </div>
 
-            <!-- Inventario Mejorado -->
             <div id="inventory-menu" class="ui-overlay">
                 <div class="window">
                     <div class="tabs">
-                        <button onclick="populateInventory('paddle')">PALAS</button>
-                        <button onclick="populateInventory('ball')">BOLAS</button>
+                        <button onclick="App.populateInventory('paddle')">PALAS</button>
+                        <button onclick="App.populateInventory('ball')">BOLAS</button>
                     </div>
                     <div id="inventory-list" class="item-grid"></div>
-                    <button class="btn-close" onclick="showUI('main')">VOLVER</button>
+                    <button onclick="showUI('main')">VOLVER</button>
                 </div>
             </div>
 
-            <!-- Game Over -->
+            <div id="profile-menu" class="ui-overlay">
+                <div class="window">
+                    <h2>CÓDIGOS PROMOCIONALES</h2>
+                    <input type="text" id="promo-input" placeholder="Introduce código...">
+                    <button onclick="App.redeemCode()">CANJEAR</button>
+                    <hr>
+                    <p>TU CÓDIGO DE RECUPERACIÓN:</p>
+                    <textarea id="save-code-output" readonly></textarea>
+                    <button onclick="showUI('main')">VOLVER</button>
+                </div>
+            </div>
+
             <div id="game-over" class="ui-overlay">
                 <div class="window gold-border">
-                    <h1 id="winner-text">FIN DEL JUEGO</h1>
-                    <div class="reward-box">
-                        <p id="reward-text">+50 PC</p>
-                    </div>
-                    <button class="btn-main" onclick="restartGame()">REINTENTAR</button>
-                    <button class="btn-flat" onclick="location.reload()">SALIR</button>
+                    <h1 id="winner-text">FIN</h1>
+                    <p id="reward-text"></p>
+                    <button class="btn-main" onclick="showUI('main')">MENÚ PRINCIPAL</button>
                 </div>
             </div>
         </div>
