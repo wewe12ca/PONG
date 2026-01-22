@@ -1,172 +1,182 @@
-const canvas = document.getElementById("pong");
-const ctx = canvas.getContext("2d");
-const modDisplay = document.getElementById("mod-display");
+const App = {
+    // ESTADO DEL JUGADOR
+    user: {
+        name: "JUGADOR_2026",
+        coins: 0,
+        xp: 0,
+        unlocked: ["p_classic", "b_classic"],
+        equipped: { paddle: "p_classic", ball: "b_classic" },
+        usedCodes: [] // Aquí se guardan los códigos ya canjeados
+    },
 
-let ball, players = [], gameActive = false;
-let currentMode, isCPU, cpuDifficulty, isCaos;
-const keys = {};
-
-const allItems = {
-    'p_base': { name: 'Verde', color: '#00ff00', rarity: 'Común', type: 'paddle' },
-    'p_blue': { name: 'Azul', color: '#0000ff', rarity: 'Común', type: 'paddle' },
-    'p_cyan': { name: 'Cian', color: '#00fbff', rarity: 'Raro', type: 'paddle' },
-    'p_pink': { name: 'Rosa', color: '#ff00ff', rarity: 'Raro', type: 'paddle' },
-    'p_gold': { name: 'Oro Puro', color: '#ffd700', rarity: 'Épico', type: 'paddle' },
-    'p_lava': { name: 'Lava', color: '#ff4500', rarity: 'Legendario', type: 'paddle' },
-    'p_rainbow': { name: 'Arcoíris', color: 'RAINBOW', rarity: 'Legendario', type: 'paddle' },
-    'b_base': { name: 'Blanca', color: '#ffffff', rarity: 'Común', type: 'ball' },
-    'b_fire': { name: 'Fuego', color: '#ff6600', rarity: 'Épico', type: 'ball' }
-};
-
-const promoCodes = {
-    'PONG2026': { type: 'coins', value: 500, label: '500 PC de Bienvenida' },
-    'SKINGOLD': { type: 'item', value: 'p_gold', label: 'Pala de Oro' }
-};
-
-let userData = {
-    coins: 200, username: "Jugador",
-    equipped: { paddle: 'p_base', ball: 'b_base' },
-    inventory: ['p_base', 'b_base'],
-    usedCodes: []
-};
-
-function updateUI() {
-    document.getElementById("display-coins").innerText = userData.coins;
-    document.getElementById("display-username").innerText = userData.username;
-    document.getElementById("save-code-output").value = btoa(JSON.stringify(userData));
-}
-
-function redeemPromo() {
-    const input = document.getElementById("promo-input");
-    const code = input.value.toUpperCase().trim();
-    if (!promoCodes[code]) return alert("Código inválido.");
-    if (userData.usedCodes.includes(code)) return alert("Ya canjeado.");
-
-    const reward = promoCodes[code];
-    if (reward.type === 'coins') userData.coins += reward.value;
-    if (reward.type === 'item') userData.inventory.push(reward.value);
-    
-    userData.usedCodes.push(code);
-    alert("🎉 Canjeado: " + reward.label);
-    input.value = ""; updateUI();
-}
-
-function openBox(tier) {
-    const prices = { 'common': 100, 'epic': 500, 'god': 1500 };
-    if (userData.coins < prices[tier]) return alert("PC insuficientes");
-    userData.coins -= prices[tier];
-    const ids = Object.keys(allItems);
-    let rewardId = ids[Math.floor(Math.random() * ids.length)];
-    
-    if (tier === 'god') {
-        const gods = ids.filter(id => allItems[id].rarity === 'Legendario' || allItems[id].rarity === 'Épico');
-        rewardId = gods[Math.floor(Math.random() * gods.length)];
-    }
-
-    if (!userData.inventory.includes(rewardId)) userData.inventory.push(rewardId);
-    else userData.coins += Math.floor(prices[tier] * 0.5);
-    updateUI();
-}
-
-function loadFromCode() {
-    try {
-        userData = JSON.parse(atob(document.getElementById("load-code-input").value));
-        updateUI(); alert("Datos de PONG 2D cargados.");
-    } catch(e) { alert("Llave inválida."); }
-}
-
-function saveUsername() {
-    userData.username = document.getElementById("username-input").value || "Jugador";
-    updateUI();
-}
-
-function equip(id) {
-    userData.equipped[allItems[id].type] = id;
-    updateUI(); populateInventory();
-}
-
-function populateInventory() {
-    const list = document.getElementById("inventory-list");
-    list.innerHTML = "";
-    userData.inventory.forEach(id => {
-        const item = allItems[id];
-        const isEq = userData.equipped[item.type] === id;
-        list.innerHTML += `<div class="item" style="border-color:${isEq?'#0f0':'#333'}">
-            <small>${item.rarity}</small><br><b>${item.name}</b><br>
-            <button onclick="equip('${id}')">${isEq ? '✓ EQUIPADO' : 'EQUIPAR'}</button>
-        </div>`;
-    });
-}
-
-function startGame(mode, cpu, diff, caos) {
-    currentMode = mode; isCPU = cpu; cpuDifficulty = diff; isCaos = caos;
-    gameActive = true; document.getElementById("top-bar").style.display = "none";
-    showUI('none'); canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-    initPlayers(); resetBall(1); requestAnimationFrame(loop);
-}
-
-function initPlayers() {
-    const pW = 15, pH = canvas.height * 0.18, mid = canvas.height/2 - pH/2;
-    let pCol = allItems[userData.equipped.paddle].color;
-    if(pCol === 'RAINBOW') pCol = '#fff';
-    players = [{ x: 40, y: mid, w: pW, h: pH, color: pCol, lives: 5, up: "w", down: "s", team: "V", ai: false }];
-    if(currentMode === 2) players.push({ x: 120, y: mid, w: pW, h: pH, color: pCol, lives: 5, up: "t", down: "g", team: "V", ai: false });
-    players.push({ x: canvas.width - 55, y: mid, w: pW, h: pH, color: "#ff0000", lives: 5, up: "arrowup", down: "arrowdown", team: "R", ai: isCPU });
-    if(currentMode === 2) players.push({ x: canvas.width - 135, y: mid, w: pW, h: pH, color: "#ff0000", lives: 5, up: "i", down: "k", team: "R", ai: isCPU });
-}
-
-function resetBall(dir) {
-    players.forEach(p => p.h = canvas.height * 0.18);
-    ball = { x: canvas.width/2, y: canvas.height/2, r: 10, dx: dir*(canvas.width*0.007), dy: (Math.random()-0.5)*8 };
-    if(isCaos) { ball.dx *= 1.5; modDisplay.innerText = "¡VELOCIDAD!"; setTimeout(()=>modDisplay.innerText="", 1500); }
-}
-
-function update() {
-    players.forEach(p => {
-        if (p.ai) p.y += (ball.y - (p.y + p.h/2)) * cpuDifficulty;
-        else {
-            if (keys[p.up] && p.y > 0) p.y -= 9;
-            if (keys[p.down] && p.y < canvas.height - p.h) p.y += 9;
+    // BASE DE DATOS DE COSMÉTICOS
+    items: {
+        paddle: {
+            p_classic: { name: "Básica", color: "#ffffff" },
+            p_neon: { name: "Cian Neón", color: "#00f2ff" },
+            p_emerald: { name: "Esmeralda", color: "#2ecc71" },
+            p_ruby: { name: "Rubí", color: "#e74c3c" },
+            p_gold: { name: "Oro Rey", color: "#ffd700" },
+            p_god: { name: "DIOS", color: "linear-gradient(#fff, #ff0)" }
+        },
+        ball: {
+            b_classic: { name: "Básica", color: "#ffffff", speed: 5 },
+            b_fire: { name: "Fuego", color: "#ff4400", speed: 8 },
+            b_ice: { name: "Hielo", color: "#00ffff", speed: 4 }
         }
-    });
-    if(allItems[userData.equipped.paddle].color === 'RAINBOW') {
-        players.filter(p => p.team === 'V').forEach(p => p.color = `hsl(${Date.now()%360}, 100%, 50%)`);
-    }
-    ball.x += ball.dx; ball.y += ball.dy;
-    if (ball.y <= 0 || ball.y >= canvas.height) ball.dy *= -1;
-    players.forEach(p => {
-        if (ball.x + ball.r > p.x && ball.x - ball.r < p.x + p.w && ball.y + ball.r > p.y && ball.y - ball.r < p.y + p.h) {
-            ball.dx *= -1.05; ball.dy += (Math.random()-0.5)*4;
+    },
+
+    // LOS 16 PROMO CODES (Recuperados todos)
+    promoCodes: {
+        "POBRE": 1,
+        "PONG2026": 500,
+        "BIENVENIDO": 200,
+        "DIOS": 5000,
+        "FREE": 100,
+        "MODULAR": 300,
+        "VERDE": 150,
+        "ULTIMATE": 1000,
+        "NUEVO": 250,
+        "PC_GRATIS": 50,
+        "RECOMPENSA": 400,
+        "FERRAN": 1000,
+        "YOUTUBE": 200,
+        "TWITCH": 200,
+        "SECRET": 777,
+        "OPENSOURCE": 500
+    },
+
+    init() {
+        this.canvas = document.getElementById("pong");
+        this.ctx = this.canvas.getContext("2d");
+        this.canvas.width = 800;
+        this.canvas.height = 400;
+        this.load(); // Carga la sesión al iniciar
+        this.updateUI();
+    },
+
+    // SISTEMA DE PERSISTENCIA (Para que no se borre la sesión)
+    save() {
+        const data = btoa(JSON.stringify(this.user));
+        localStorage.setItem("PONG_SAVE_2026", data);
+        if(document.getElementById("save-code-output")) {
+            document.getElementById("save-code-output").value = data;
         }
-    });
-    if (ball.x < 0) score("R"); if (ball.x > canvas.width) score("V");
-}
+    },
 
-function score(t) {
-    players.filter(p => p.team !== t).forEach(p => p.lives--);
-    if (players.some(p => p.lives <= 0)) {
-        gameActive = false; userData.coins += isCaos ? 100 : 50; updateUI();
-        document.getElementById("top-bar").style.display = "flex";
-        document.getElementById("game-over").style.display = "flex";
-        document.getElementById("winner-text").innerText = t === "V" ? "¡VICTORIA!" : "DERROTA";
-    } else resetBall(t === "V" ? -1 : 1);
-}
+    load() {
+        const saved = localStorage.getItem("PONG_SAVE_2026");
+        if (saved) {
+            try {
+                const decoded = JSON.parse(atob(saved));
+                // Fusionamos datos para no perder nuevas funciones
+                this.user = Object.assign(this.user, decoded);
+            } catch(e) { console.error("Error cargando datos"); }
+        }
+    },
 
-function render() {
-    ctx.fillStyle = "rgba(0,0,0,0.2)"; ctx.fillRect(0,0,canvas.width,canvas.height);
-    players.forEach(p => { ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, p.w, p.h); });
-    ctx.fillStyle = allItems[userData.equipped.ball].color;
-    ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI*2); ctx.fill();
-}
+    updateUI() {
+        document.getElementById("display-username").innerText = this.user.name;
+        document.getElementById("display-coins").innerText = this.user.coins;
+        this.save(); // Guarda automáticamente cada vez que algo cambia
+    },
 
-function loop() { if(gameActive){ update(); render(); requestAnimationFrame(loop); } }
+    redeemCode() {
+        const input = document.getElementById("promo-input");
+        const code = input.value.toUpperCase().trim();
+        
+        if (this.user.usedCodes.includes(code)) return alert("⚠️ Código ya usado");
+        
+        if (this.promoCodes[code]) {
+            const reward = this.promoCodes[code];
+            this.user.coins += reward;
+            this.user.usedCodes.push(code);
+            alert(`🎁 ¡Canjeado! Has recibido ${reward} PC`);
+            this.updateUI();
+            input.value = "";
+        } else {
+            alert("❌ Código no válido");
+        }
+    },
+
+    populateInventory(cat) {
+        const grid = document.getElementById("inventory-list");
+        grid.innerHTML = "";
+        Object.keys(this.items[cat]).forEach(id => {
+            const has = this.user.unlocked.includes(id);
+            const eq = this.user.equipped[cat] === id;
+            grid.innerHTML += `
+                <div class="loot-card">
+                    <p style="color:${this.items[cat][id].color}">${this.items[cat][id].name}</p>
+                    <button onclick="App.equip('${cat}','${id}')" ${!has?'disabled':''}>
+                        ${eq ? 'EQUIPADO' : (has?'USAR':'LOCKED')}
+                    </button>
+                </div>`;
+        });
+    },
+
+    equip(cat, id) {
+        this.user.equipped[cat] = id;
+        this.updateUI();
+        this.populateInventory(cat);
+    }
+};
+
+// MOTOR DEL JUEGO
+let gameLoop;
+function startGame(isCpu) {
+    showUI('none');
+    let b = { x: 400, y: 200, dx: 5, dy: 5 };
+    let p1 = 150, p2 = 150;
+    
+    if(gameLoop) clearInterval(gameLoop);
+
+    gameLoop = setInterval(() => {
+        b.x += b.dx; b.y += b.dy;
+        if (b.y < 0 || b.y > 390) b.dy *= -1;
+        if(isCpu) p2 += (b.y - (p2 + 40)) * 0.1;
+
+        const ctx = App.ctx;
+        ctx.fillStyle = "black"; ctx.fillRect(0,0,800,400);
+        
+        // Dibujo con cosméticos
+        ctx.fillStyle = App.items.paddle[App.user.equipped.paddle].color;
+        ctx.fillRect(10, p1, 10, 80); 
+        ctx.fillRect(780, p2, 10, 80);
+        
+        ctx.fillStyle = App.items.ball[App.user.equipped.ball].color;
+        ctx.fillRect(b.x, b.y, 10, 10);
+
+        // Colisiones
+        if (b.x < 20 && b.y > p1 && b.y < p1 + 80) b.dx *= -1.05;
+        if (b.x > 770 && b.y > p2 && b.y < p2 + 80) b.dx *= -1.05;
+
+        // Game Over
+        if (b.x < 0 || b.x > 800) {
+            clearInterval(gameLoop);
+            const win = b.x > 800;
+            App.user.coins += win ? 50 : 10;
+            document.getElementById("winner-text").innerText = win ? "VICTORIA" : "DERROTA";
+            document.getElementById("reward-text").innerText = win ? "+50 PC" : "+10 PC";
+            showUI('game-over');
+            App.updateUI();
+        }
+    }, 1000/60);
+
+    window.onmousemove = (e) => {
+        let rect = App.canvas.getBoundingClientRect();
+        p1 = e.clientY - rect.top - 40;
+    };
+}
 
 function showUI(menu) {
-    ['main-menu', 'shop-menu', 'inventory-menu', 'profile-menu', 'game-over'].forEach(id => document.getElementById(id).style.display = "none");
-    if (menu === 'inventory') populateInventory();
-    if(menu !== 'none') document.getElementById(menu + "-menu").style.display = "flex";
+    // Detenemos el juego si volvemos a la UI
+    if(menu !== 'none' && gameLoop) clearInterval(gameLoop);
+
+    document.querySelectorAll('.ui-overlay').forEach(el => el.classList.remove('active'));
+    const ids = { 'main': 'main-menu', 'inventory': 'inventory-menu', 'profile': 'profile-menu', 'game-over': 'game-over' };
+    if (ids[menu]) document.getElementById(ids[menu]).classList.add('active');
+    if (menu === 'inventory') App.populateInventory('paddle');
 }
 
-window.addEventListener("keydown", e => keys[e.key.toLowerCase()] = true);
-window.addEventListener("keyup", e => keys[e.key.toLowerCase()] = false);
-updateUI();
+window.onload = () => App.init();
