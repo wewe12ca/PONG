@@ -2,74 +2,78 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>PONG 2D - Edición 2026</title>
+    <title>PONG 2D | ULTIMATE 2026</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- FONDO ANIMADO -->
+    <div class="bg-animation">
+        <div id="particles"></div>
+    </div>
+
+    <!-- HUD SUPERIOR -->
     <div id="top-bar">
-        <span>👤 <b id="display-username">Invitado</b></span>
-        <span>💰 <b id="display-coins">0</b> PC</span>
-        <div class="top-btns">
-            <button onclick="showUI('shop')">🛒 Tienda</button>
-            <button onclick="showUI('inventory')">🎒 Inventario</button>
-            <button onclick="showUI('profile')">🔑 Login/Codes</button>
+        <div class="stat-group">
+            <div class="user-pill">👤 <span id="display-username">Jugador</span></div>
+            <div class="coin-pill">💰 <span id="display-coins">0</span> <small>PC</small></div>
+        </div>
+        <div class="nav-btns">
+            <button onclick="showUI('shop')">TIENDA</button>
+            <button onclick="showUI('inventory')">COLECCIÓN</button>
+            <button onclick="showUI('profile')">PERFIL</button>
         </div>
     </div>
 
-    <canvas id="pong"></canvas>
-    <div id="mod-display" class="mod-indicator"></div>
+    <main id="game-area">
+        <canvas id="pong"></canvas>
+        <div id="mod-display" class="mod-indicator"></div>
 
-    <!-- MENÚ PRINCIPAL -->
-    <div id="main-menu" class="ui-overlay">
-        <h1>PONG 2D</h1>
-        <p>VERSIÓN 2026</p>
-        <div class="btn-group">
-            <button onclick="startGame(1, false, 0, false)">1 VS 1</button>
-            <button onclick="startGame(2, false, 0, false)">2 VS 2</button>
-            <button onclick="startGame(1, false, 0, true)" class="caos-mode">CAOS 1v1</button>
-            <button onclick="startGame(1, true, 0.1, false)">VS CPU PRO</button>
+        <!-- PANTALLAS UI (SE SUPERPONEN AL CANVAS) -->
+        <div id="ui-container">
+            <!-- Portada -->
+            <div id="title-screen" class="ui-overlay active">
+                <h1 class="logo">PONG<span class="accent">2D</span></h1>
+                <div class="glow-bar"></div>
+                <button class="btn-main" onclick="showUI('main')">ENTRAR AL SISTEMA</button>
+            </div>
+
+            <!-- Menú Modos -->
+            <div id="main-menu" class="ui-overlay">
+                <div class="window">
+                    <h2 class="neon-text">MODOS DE JUEGO</h2>
+                    <div class="mode-grid">
+                        <button class="btn-mode" onclick="startGame(1, false)">1 VS 1</button>
+                        <button class="btn-mode" onclick="startGame(1, true)">VS CPU PRO</button>
+                        <button class="btn-mode chaos" onclick="showUI('caos-select')">MODO CAOS 🔥</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Inventario Mejorado -->
+            <div id="inventory-menu" class="ui-overlay">
+                <div class="window">
+                    <div class="tabs">
+                        <button onclick="populateInventory('paddle')">PALAS</button>
+                        <button onclick="populateInventory('ball')">BOLAS</button>
+                    </div>
+                    <div id="inventory-list" class="item-grid"></div>
+                    <button class="btn-close" onclick="showUI('main')">VOLVER</button>
+                </div>
+            </div>
+
+            <!-- Game Over -->
+            <div id="game-over" class="ui-overlay">
+                <div class="window gold-border">
+                    <h1 id="winner-text">FIN DEL JUEGO</h1>
+                    <div class="reward-box">
+                        <p id="reward-text">+50 PC</p>
+                    </div>
+                    <button class="btn-main" onclick="restartGame()">REINTENTAR</button>
+                    <button class="btn-flat" onclick="location.reload()">SALIR</button>
+                </div>
+            </div>
         </div>
-    </div>
-
-    <!-- TIENDA DE LOOTBOXES -->
-    <div id="shop-menu" class="ui-overlay" style="display:none">
-        <h2>SUMINISTROS PONG 2D</h2>
-        <div class="shop-grid">
-            <div class="item rare"><span>📦 BRONCE</span><button onclick="openBox('common')">100 PC</button></div>
-            <div class="item epic"><span>💎 ÉPICA</span><button onclick="openBox('epic')">500 PC</button></div>
-            <div class="item legendary"><span>🔥 DIOS</span><button onclick="openBox('god')">1500 PC</button></div>
-        </div>
-        <button onclick="showUI('main')">VOLVER</button>
-    </div>
-
-    <!-- INVENTARIO -->
-    <div id="inventory-menu" class="ui-overlay" style="display:none">
-        <h2>MI COLECCIÓN</h2>
-        <div id="inventory-list" class="shop-grid"></div>
-        <button onclick="showUI('main')">VOLVER</button>
-    </div>
-
-    <!-- PERFIL Y CÓDIGOS -->
-    <div id="profile-menu" class="ui-overlay" style="display:none">
-        <h2>🔑 SESIÓN Y REGALOS</h2>
-        <textarea id="save-code-output" readonly onclick="this.select()"></textarea>
-        <input type="text" id="load-code-input" placeholder="Pega tu llave aquí...">
-        <button onclick="loadFromCode()">INICIAR SESIÓN</button>
-        <hr style="width:80%; border:0.5px solid #333; margin:15px;">
-        <div class="promo-box">
-            <input type="text" id="promo-input" placeholder="Código de Regalo...">
-            <button onclick="redeemPromo()">CANJEAR</button>
-        </div>
-        <hr style="width:80%; border:0.5px solid #333; margin:15px;">
-        <input type="text" id="username-input" placeholder="Nombre...">
-        <button onclick="saveUsername()">CAMBIAR NOMBRE</button>
-        <button onclick="showUI('main')">VOLVER</button>
-    </div>
-
-    <div id="game-over" class="ui-overlay" style="display:none">
-        <h2 id="winner-text"></h2>
-        <button onclick="location.reload()">MENÚ</button>
-    </div>
+    </main>
 
     <script src="game.js"></script>
 </body>
