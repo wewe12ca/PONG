@@ -1,199 +1,172 @@
 const canvas = document.getElementById("pong");
 const ctx = canvas.getContext("2d");
-let ball, players = [], gameActive = false, isPaused = false;
-let lastConfig = { mode: 1, cpu: false, diff: 0, caos: false };
+const modDisplay = document.getElementById("mod-display");
+
+let ball, players = [], gameActive = false;
+let currentMode, isCPU, cpuDifficulty, isCaos;
 const keys = {};
 
 const allItems = {
-    'p_base': { name: 'Verde', color: '#00ff00', type: 'paddle' },
-    'p_rainbow': { name: 'Gamer', color: '#00ffff', type: 'paddle' },
-    'b_base': { name: 'Blanca', color: '#ffffff', type: 'ball', speedMult: 1.0 },
-    'b_fire': { name: 'Fuego', color: '#ff6600', type: 'ball', speedMult: 1.6 },
-    'b_ice': { name: 'Hielo', color: '#00ffff', type: 'ball', speedMult: 2.2 },
-    'bg_black': { name: 'Oscuro', color: '#050505', type: 'bg' }
+    'p_base': { name: 'Verde', color: '#00ff00', rarity: 'Común', type: 'paddle' },
+    'p_blue': { name: 'Azul', color: '#0000ff', rarity: 'Común', type: 'paddle' },
+    'p_cyan': { name: 'Cian', color: '#00fbff', rarity: 'Raro', type: 'paddle' },
+    'p_pink': { name: 'Rosa', color: '#ff00ff', rarity: 'Raro', type: 'paddle' },
+    'p_gold': { name: 'Oro Puro', color: '#ffd700', rarity: 'Épico', type: 'paddle' },
+    'p_lava': { name: 'Lava', color: '#ff4500', rarity: 'Legendario', type: 'paddle' },
+    'p_rainbow': { name: 'Arcoíris', color: 'RAINBOW', rarity: 'Legendario', type: 'paddle' },
+    'b_base': { name: 'Blanca', color: '#ffffff', rarity: 'Común', type: 'ball' },
+    'b_fire': { name: 'Fuego', color: '#ff6600', rarity: 'Épico', type: 'ball' }
 };
 
-let userData = JSON.parse(localStorage.getItem('pong_2026')) || {
-    coins: 250, username: "Piloto",
-    equipped: { paddle: 'p_base', ball: 'b_base', bg: 'bg_black' },
-    inventory: ['p_base', 'b_base', 'bg_black']
+const promoCodes = {
+    'PONG2026': { type: 'coins', value: 500, label: '500 PC de Bienvenida' },
+    'SKINGOLD': { type: 'item', value: 'p_gold', label: 'Pala de Oro' }
 };
 
-// --- FUNCIONES GLOBALES (Aseguramos que estén en el window) ---
-window.updateUI = function() {
+let userData = {
+    coins: 200, username: "Jugador",
+    equipped: { paddle: 'p_base', ball: 'b_base' },
+    inventory: ['p_base', 'b_base'],
+    usedCodes: []
+};
+
+function updateUI() {
     document.getElementById("display-coins").innerText = userData.coins;
     document.getElementById("display-username").innerText = userData.username;
     document.getElementById("save-code-output").value = btoa(JSON.stringify(userData));
-    localStorage.setItem('pong_2026', JSON.stringify(userData));
-};
-
-window.showUI = function(menu) {
-    const ids = ['title-screen', 'main-menu', 'caos-select-menu', 'inventory-menu', 'shop-menu', 'profile-menu', 'game-over', 'pause-menu'];
-    ids.forEach(id => {
-        const el = document.getElementById(id);
-        if(el) el.style.display = "none";
-    });
-
-    if(menu === 'none') return;
-    
-    let target = menu === 'main' ? 'main-menu' : (menu === 'caos-select' ? 'caos-select-menu' : menu + '-menu');
-    const targetEl = document.getElementById(target);
-    if(targetEl) targetEl.style.display = "flex";
-    
-    if(menu === 'inventory') window.populateInventory('paddle');
-};
-
-window.enterGame = function() {
-    document.getElementById("title-screen").style.display = "none";
-    document.getElementById("top-bar").style.display = "flex";
-    window.showUI('main');
-};
-
-window.startGame = function(mode, cpu, diff, caos) {
-    lastConfig = { mode, cpu, diff, caos };
-    gameActive = true;
-    isPaused = false;
-    window.showUI('none');
-    document.getElementById("top-bar").style.display = "none";
-    
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    
-    const pH = canvas.height * 0.18;
-    players = [
-        { x: 40, y: canvas.height/2-pH/2, w: 15, h: pH, color: allItems[userData.equipped.paddle].color, lives: 5, up: "w", down: "s", ai: false },
-        { x: canvas.width-55, y: canvas.height/2-pH/2, w: 15, h: pH, color: "#ff2244", lives: 5, up: "arrowup", down: "arrowdown", ai: cpu }
-    ];
-    resetBall(1);
-    requestAnimationFrame(loop);
-};
-
-window.openBox = function(tier) {
-    const prices = { common: 100, epic: 500, god: 1500 };
-    if (userData.coins < prices[tier]) return alert("Faltan PC.");
-    userData.coins -= prices[tier];
-    
-    let pool = Object.keys(allItems);
-    if (tier !== 'god') pool = pool.filter(id => id !== 'b_fire' && id !== 'b_ice');
-
-    const reward = pool[Math.floor(Math.random() * pool.length)];
-    if (!userData.inventory.includes(reward)) userData.inventory.push(reward);
-    else userData.coins += Math.floor(prices[tier] * 0.4);
-    
-    window.updateUI();
-    alert("¡Obtenido: " + allItems[reward].name + "!");
-};
-
-window.populateInventory = function(type) {
-    const list = document.getElementById("inventory-list");
-    list.innerHTML = "";
-    userData.inventory.filter(id => allItems[id].type === type).forEach(id => {
-        const item = allItems[id];
-        const isEq = userData.equipped[type] === id;
-        list.innerHTML += `<div class="loot-card" style="border: 2px solid ${isEq?'#00ff88':'#444'}" onclick="window.equip('${id}', '${type}')">
-            <div class="preview" style="background:${item.color}"></div>
-            <small>${item.name}</small>
-        </div>`;
-    });
-};
-
-window.equip = function(id, type) {
-    userData.equipped[type] = id;
-    window.updateUI();
-    window.populateInventory(type);
-};
-
-window.restartGame = function() {
-    window.startGame(lastConfig.mode, lastConfig.cpu, lastConfig.diff, lastConfig.caos);
-};
-
-window.resumeGame = function() {
-    isPaused = false;
-    document.getElementById("pause-menu").style.display = "none";
-};
-
-window.loadFromCode = function() {
-    try {
-        userData = JSON.parse(atob(document.getElementById("load-code-input").value));
-        window.updateUI();
-        alert("Datos Cargados correctamente.");
-    } catch(e) { alert("Código inválido."); }
-};
-
-// --- LÓGICA INTERNA ---
-function resetBall(dir) {
-    const speed = (canvas.width * 0.007) * allItems[userData.equipped.ball].speedMult * (lastConfig.caos ? 1.4 : 1);
-    ball = { x: canvas.width/2, y: canvas.height/2, r: 10, dx: dir * speed, dy: (Math.random()-0.5)*10 };
 }
 
-function loop() {
-    if (!gameActive || isPaused) return;
-    update();
-    render();
-    requestAnimationFrame(loop);
+function redeemPromo() {
+    const input = document.getElementById("promo-input");
+    const code = input.value.toUpperCase().trim();
+    if (!promoCodes[code]) return alert("Código inválido.");
+    if (userData.usedCodes.includes(code)) return alert("Ya canjeado.");
+
+    const reward = promoCodes[code];
+    if (reward.type === 'coins') userData.coins += reward.value;
+    if (reward.type === 'item') userData.inventory.push(reward.value);
+    
+    userData.usedCodes.push(code);
+    alert("🎉 Canjeado: " + reward.label);
+    input.value = ""; updateUI();
+}
+
+function openBox(tier) {
+    const prices = { 'common': 100, 'epic': 500, 'god': 1500 };
+    if (userData.coins < prices[tier]) return alert("PC insuficientes");
+    userData.coins -= prices[tier];
+    const ids = Object.keys(allItems);
+    let rewardId = ids[Math.floor(Math.random() * ids.length)];
+    
+    if (tier === 'god') {
+        const gods = ids.filter(id => allItems[id].rarity === 'Legendario' || allItems[id].rarity === 'Épico');
+        rewardId = gods[Math.floor(Math.random() * gods.length)];
+    }
+
+    if (!userData.inventory.includes(rewardId)) userData.inventory.push(rewardId);
+    else userData.coins += Math.floor(prices[tier] * 0.5);
+    updateUI();
+}
+
+function loadFromCode() {
+    try {
+        userData = JSON.parse(atob(document.getElementById("load-code-input").value));
+        updateUI(); alert("Datos de PONG 2D cargados.");
+    } catch(e) { alert("Llave inválida."); }
+}
+
+function saveUsername() {
+    userData.username = document.getElementById("username-input").value || "Jugador";
+    updateUI();
+}
+
+function equip(id) {
+    userData.equipped[allItems[id].type] = id;
+    updateUI(); populateInventory();
+}
+
+function populateInventory() {
+    const list = document.getElementById("inventory-list");
+    list.innerHTML = "";
+    userData.inventory.forEach(id => {
+        const item = allItems[id];
+        const isEq = userData.equipped[item.type] === id;
+        list.innerHTML += `<div class="item" style="border-color:${isEq?'#0f0':'#333'}">
+            <small>${item.rarity}</small><br><b>${item.name}</b><br>
+            <button onclick="equip('${id}')">${isEq ? '✓ EQUIPADO' : 'EQUIPAR'}</button>
+        </div>`;
+    });
+}
+
+function startGame(mode, cpu, diff, caos) {
+    currentMode = mode; isCPU = cpu; cpuDifficulty = diff; isCaos = caos;
+    gameActive = true; document.getElementById("top-bar").style.display = "none";
+    showUI('none'); canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+    initPlayers(); resetBall(1); requestAnimationFrame(loop);
+}
+
+function initPlayers() {
+    const pW = 15, pH = canvas.height * 0.18, mid = canvas.height/2 - pH/2;
+    let pCol = allItems[userData.equipped.paddle].color;
+    if(pCol === 'RAINBOW') pCol = '#fff';
+    players = [{ x: 40, y: mid, w: pW, h: pH, color: pCol, lives: 5, up: "w", down: "s", team: "V", ai: false }];
+    if(currentMode === 2) players.push({ x: 120, y: mid, w: pW, h: pH, color: pCol, lives: 5, up: "t", down: "g", team: "V", ai: false });
+    players.push({ x: canvas.width - 55, y: mid, w: pW, h: pH, color: "#ff0000", lives: 5, up: "arrowup", down: "arrowdown", team: "R", ai: isCPU });
+    if(currentMode === 2) players.push({ x: canvas.width - 135, y: mid, w: pW, h: pH, color: "#ff0000", lives: 5, up: "i", down: "k", team: "R", ai: isCPU });
+}
+
+function resetBall(dir) {
+    players.forEach(p => p.h = canvas.height * 0.18);
+    ball = { x: canvas.width/2, y: canvas.height/2, r: 10, dx: dir*(canvas.width*0.007), dy: (Math.random()-0.5)*8 };
+    if(isCaos) { ball.dx *= 1.5; modDisplay.innerText = "¡VELOCIDAD!"; setTimeout(()=>modDisplay.innerText="", 1500); }
 }
 
 function update() {
     players.forEach(p => {
-        if (p.ai) p.y += (ball.y - (p.y + p.h/2)) * lastConfig.diff;
+        if (p.ai) p.y += (ball.y - (p.y + p.h/2)) * cpuDifficulty;
         else {
-            if (keys[p.up]) p.y -= 10;
-            if (keys[p.down]) p.y += 10;
+            if (keys[p.up] && p.y > 0) p.y -= 9;
+            if (keys[p.down] && p.y < canvas.height - p.h) p.y += 9;
         }
-        p.y = Math.max(0, Math.min(canvas.height - p.h, p.y));
     });
+    if(allItems[userData.equipped.paddle].color === 'RAINBOW') {
+        players.filter(p => p.team === 'V').forEach(p => p.color = `hsl(${Date.now()%360}, 100%, 50%)`);
+    }
     ball.x += ball.dx; ball.y += ball.dy;
     if (ball.y <= 0 || ball.y >= canvas.height) ball.dy *= -1;
     players.forEach(p => {
         if (ball.x + ball.r > p.x && ball.x - ball.r < p.x + p.w && ball.y + ball.r > p.y && ball.y - ball.r < p.y + p.h) {
-            ball.dx *= -1.05;
-            ball.x = ball.dx > 0 ? p.x + p.w + 5 : p.x - ball.r - 5;
+            ball.dx *= -1.05; ball.dy += (Math.random()-0.5)*4;
         }
     });
-    if (ball.x < 0) finishRound(0);
-    if (ball.x > canvas.width) finishRound(1);
+    if (ball.x < 0) score("R"); if (ball.x > canvas.width) score("V");
+}
+
+function score(t) {
+    players.filter(p => p.team !== t).forEach(p => p.lives--);
+    if (players.some(p => p.lives <= 0)) {
+        gameActive = false; userData.coins += isCaos ? 100 : 50; updateUI();
+        document.getElementById("top-bar").style.display = "flex";
+        document.getElementById("game-over").style.display = "flex";
+        document.getElementById("winner-text").innerText = t === "V" ? "¡VICTORIA!" : "DERROTA";
+    } else resetBall(t === "V" ? -1 : 1);
 }
 
 function render() {
-    ctx.fillStyle = allItems[userData.equipped.bg].color;
-    ctx.fillRect(0,0,canvas.width, canvas.height);
-    players.forEach(p => {
-        ctx.fillStyle = p.color;
-        ctx.fillRect(p.x, p.y, p.w, p.h);
-    });
+    ctx.fillStyle = "rgba(0,0,0,0.2)"; ctx.fillRect(0,0,canvas.width,canvas.height);
+    players.forEach(p => { ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, p.w, p.h); });
     ctx.fillStyle = allItems[userData.equipped.ball].color;
     ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI*2); ctx.fill();
-    
-    ctx.fillStyle = "white";
-    ctx.font = "bold 20px Arial";
-    ctx.fillText("VIDAS: " + players[0].lives, 50, 40);
-    ctx.fillText("VIDAS: " + players[1].lives, canvas.width - 150, 40);
 }
 
-function finishRound(loserIdx) {
-    players[loserIdx].lives--;
-    if (players[loserIdx].lives <= 0) {
-        gameActive = false;
-        userData.coins += 100;
-        window.updateUI();
-        document.getElementById("winner-text").innerText = (loserIdx === 1) ? "¡VICTORIA VERDE!" : "¡VICTORIA ROJA!";
-        document.getElementById("reward-text").innerText = "💰 +100 PC OBTENIDOS";
-        document.getElementById("top-bar").style.display = "flex";
-        window.showUI('game-over');
-    } else {
-        resetBall(loserIdx === 0 ? 1 : -1);
-    }
+function loop() { if(gameActive){ update(); render(); requestAnimationFrame(loop); } }
+
+function showUI(menu) {
+    ['main-menu', 'shop-menu', 'inventory-menu', 'profile-menu', 'game-over'].forEach(id => document.getElementById(id).style.display = "none");
+    if (menu === 'inventory') populateInventory();
+    if(menu !== 'none') document.getElementById(menu + "-menu").style.display = "flex";
 }
 
-// EVENTOS
-window.addEventListener("keydown", e => {
-    keys[e.key.toLowerCase()] = true;
-    if(e.key === "Escape" && gameActive) {
-        isPaused = !isPaused;
-        document.getElementById("pause-menu").style.display = isPaused ? "flex" : "none";
-    }
-});
+window.addEventListener("keydown", e => keys[e.key.toLowerCase()] = true);
 window.addEventListener("keyup", e => keys[e.key.toLowerCase()] = false);
-
-// Inicio
-window.updateUI();
+updateUI();
