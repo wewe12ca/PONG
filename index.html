@@ -2,49 +2,43 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PONG ULTIMATE 2026 | FINAL EDITION</title>
+    <title>PONG ULTIMATE 2026</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="bg-animation"><div id="particles"></div></div>
 
-    <!-- HUD SUPERIOR -->
     <div id="top-bar">
         <div class="stat-group">
             <div class="user-pill">👤 <span id="display-username">Cargando...</span></div>
             <div class="coin-pill">💰 <span id="display-coins">0</span> PC</div>
         </div>
         <div class="nav-btns">
-            <button onclick="showUI('shop')">TIENDA</button>
+            <button onclick="showUI('shop')">LOOTBOXES</button>
             <button onclick="showUI('inventory')">COLECCIÓN</button>
             <button onclick="showUI('profile')">PERFIL</button>
         </div>
     </div>
 
     <main id="game-area">
-        <!-- El Canvas donde se dibuja el juego -->
         <canvas id="pong"></canvas>
 
         <div id="ui-layer">
-            <!-- PANTALLA DE TÍTULO Y ENTRADA -->
             <div id="title-screen" class="ui-overlay active">
                 <h1 class="logo">PONG<span class="accent">2D</span></h1>
-                <!-- Input oculto para el registro inicial -->
                 <input type="text" id="username-input" placeholder="Tu Nombre..." style="display:none; margin: 10px auto; padding: 10px; width: 200px;">
-                <button class="btn-main" id="main-btn" onclick="App.checkSession()">ENTRAR AL JUEGO</button>
+                <button class="btn-main" id="main-btn" onclick="App.checkSession()">ENTRAR</button>
             </div>
 
-            <!-- MENÚ PRINCIPAL -->
             <div id="main-menu" class="ui-overlay">
                 <div class="window">
                     <h2 class="neon-text">MODOS DE JUEGO</h2>
-                    <button class="btn-mode" onclick="startGame(false)">1 VS 1 LOCAL</button>
-                    <button class="btn-mode" onclick="startGame(true)">VS CPU PRO</button>
+                    <button class="btn-mode" onclick="startGame('mouse_vs_cpu')">VS CPU (Ratón)</button>
+                    <button class="btn-mode" onclick="startGame('keyboard_1v1')">1 VS 1 (Teclado)</button>
                 </div>
             </div>
-
-            <!-- TIENDA DE LOOTBOXES -->
+            
+            <!-- Tienda de Lootboxes -->
             <div id="shop-menu" class="ui-overlay">
                 <div class="window">
                     <h2 class="neon-text">SUMINISTROS</h2>
@@ -57,44 +51,37 @@
                 </div>
             </div>
 
-            <!-- INVENTARIO -->
+            <!-- Inventario/Colección (Con botón para Tienda Completa) -->
             <div id="inventory-menu" class="ui-overlay">
                 <div class="window">
                     <div class="tabs">
-                        <button onclick="App.populateInventory('paddle')">PALAS</button>
-                        <button onclick="App.populateInventory('ball')">BOLAS</button>
+                        <button onclick="App.populateInventory('paddle')">PALAS EQUIPADAS</button>
+                        <button onclick="App.populateInventory('ball')">BOLAS EQUIPADAS</button>
                     </div>
                     <div id="inventory-list" class="item-grid"></div>
-                    <button onclick="showUI('main')">VOLVER</button>
+                    <button onclick="showUI('full_store')" style="margin-top:10px;">TIENDA COMPLETA</button>
+                    <button onclick="showUI('main')">CERRAR</button>
+                </div>
+            </div>
+            
+            <!-- TIENDA COMPLETA (NUEVA VENTANA) -->
+            <div id="full-store-menu" class="ui-overlay">
+                <div class="window" style="min-width: 600px;">
+                    <h2 class="neon-text">CATÁLOGO 2026</h2>
+                    <div class="tabs">
+                        <button onclick="App.populateStore('paddle')">PALAS</button>
+                        <button onclick="App.populateStore('ball')">BOLAS</button>
+                    </div>
+                    <div id="store-list" class="item-grid"></div>
+                    <button onclick="showUI('inventory')">VOLVER A COLECCIÓN</button>
                 </div>
             </div>
 
-            <!-- PERFIL / CÓDIGOS -->
-            <div id="profile-menu" class="ui-overlay">
-                <div class="window">
-                    <h2>PROMOCIONES</h2>
-                    <input type="text" id="promo-input" placeholder="Introduce código...">
-                    <button onclick="App.redeemCode()">CANJEAR</button>
-                    <hr>
-                    <p>KEY DE RECUPERACIÓN:</p>
-                    <textarea id="save-code-output" readonly></textarea>
-                    <button onclick="showUI('main')">VOLVER</button>
-                </div>
-            </div>
 
-            <!-- GAME OVER -->
-            <div id="game-over" class="ui-overlay">
-                <div class="window">
-                    <h1 id="winner-text">FIN</h1>
-                    <p id="reward-text"></p>
-                    <!-- Este botón no recarga la página, mantiene la sesión viva -->
-                    <button class="btn-main" onclick="showUI('main')">MENÚ PRINCIPAL</button>
-                </div>
-            </div>
+            <div id="profile-menu" class="ui-overlay">...</div>
+            <div id="game-over" class="ui-overlay">...</div>
         </div>
     </main>
-
-    <!-- Enlaza el archivo JavaScript -->
     <script src="game.js"></script>
 </body>
 </html>
