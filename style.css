@@ -1,11 +1,147 @@
-body, html { margin: 0; background: #000; overflow: hidden; font-family: 'Segoe UI', sans-serif; color: white; }
-#top-bar { position: absolute; top: 0; width: 100%; padding: 10px; display: flex; justify-content: space-around; background: rgba(255,255,255,0.05); z-index: 100; }
-.ui-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.9); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 50; }
-.btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.shop-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 15px; }
-.item { background: #111; padding: 10px; border: 2px solid #333; text-align: center; }
-.item.rare { border-color: #00fbff; } .item.epic { border-color: #ffd700; } .item.legendary { border-color: #ff4500; }
-button { padding: 8px; background: none; border: 1px solid #fff; color: white; cursor: pointer; }
-button:hover { background: white; color: black; }
-textarea { width: 80%; height: 40px; background: #111; color: #0f0; font-family: monospace; font-size: 10px; margin-bottom: 10px; }
-input { padding: 8px; background: #111; border: 1px solid #333; color: white; margin-bottom: 5px; }
+:root {
+    --neon-green: #2ecc71;
+    --dark-green: #145a32;
+    --bg-black: #050a05;
+    --ui-panel: rgba(10, 20, 10, 0.85);
+    --shadow: 0 0 15px rgba(46, 204, 113, 0.5);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+
+body {
+    background-color: var(--bg-black);
+    color: white;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* FONDO ANIMADO VERDE */
+.bg-animation {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    z-index: -1;
+    background: radial-gradient(circle at center, var(--dark-green) 0%, var(--bg-black) 100%);
+}
+
+#particles {
+    width: 100%; height: 100%;
+    background-image: 
+        radial-gradient(var(--neon-green) 1px, transparent 1px),
+        radial-gradient(var(--neon-green) 1px, transparent 1px);
+    background-size: 50px 50px;
+    background-position: 0 0, 25px 25px;
+    animation: moveBg 10s linear infinite;
+    opacity: 0.2;
+}
+
+@keyframes moveBg {
+    from { transform: translateY(0); }
+    to { transform: translateY(50px); }
+}
+
+/* HUD SUPERIOR */
+#top-bar {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px 30px;
+    background: rgba(0,0,0,0.8);
+    border-bottom: 2px solid var(--neon-green);
+    box-shadow: var(--shadow);
+}
+
+.user-pill, .coin-pill {
+    background: #111;
+    padding: 8px 15px;
+    border-radius: 20px;
+    border: 1px solid var(--neon-green);
+    display: inline-block;
+    margin-right: 10px;
+}
+
+/* ÁREA DE JUEGO */
+#game-area {
+    position: relative;
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+canvas {
+    background: rgba(0, 0, 0, 0.9);
+    border: 3px solid var(--neon-green);
+    box-shadow: 0 0 30px var(--dark-green);
+}
+
+/* SISTEMA DE CAPAS UI */
+.ui-overlay {
+    position: absolute;
+    display: none; /* Se activa con JS */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(5px);
+}
+
+.ui-overlay.active { display: flex; }
+
+.window {
+    background: var(--ui-panel);
+    padding: 40px;
+    border-radius: 15px;
+    border: 2px solid var(--neon-green);
+    text-align: center;
+    min-width: 400px;
+}
+
+/* BOTONES */
+button {
+    background: transparent;
+    color: white;
+    border: 1px solid var(--neon-green);
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: 0.3s;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+button:hover {
+    background: var(--neon-green);
+    color: black;
+    box-shadow: 0 0 20px var(--neon-green);
+}
+
+.btn-main {
+    font-size: 1.5rem;
+    padding: 15px 40px;
+    margin-top: 20px;
+}
+
+.btn-mode { width: 100%; margin: 10px 0; font-size: 1.1rem; }
+
+/* INVENTARIO */
+.item-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.loot-card {
+    background: #1a1a1a;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #333;
+}
+
+.loot-card:hover { border-color: var(--neon-green); }
+
+/* ANIMACIONES DE TEXTO */
+.logo { font-size: 5rem; letter-spacing: 10px; color: white; text-shadow: 0 0 20px var(--neon-green); }
+.accent { color: var(--neon-green); }
+.neon-text { color: var(--neon-green); text-shadow: 0 0 10px var(--neon-green); }
