@@ -3,42 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PONG COSMIC - 2026</title>
+    <title>PONG ULTIMATE 2026</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div id="game-container">
-        <!-- HUD Superior -->
+        <!-- Pantalla de HUD (Vidas y Monedas) -->
         <div id="hud" style="display:none;">
-            <span>Vidas: <span id="lives-display">3</span></span>
-            <span>Monedas: <span id="coins-display">0</span></span>
+            <div>VIDAS: <span id="lives-display">3</span></div>
+            <div>MONEDAS: <span id="coins-display">0</span> 🪙</div>
         </div>
 
         <!-- Menú Principal -->
         <div id="menu-main" class="screen">
-            <h1>PONG ULTIMATE</h1>
-            <div class="login-section">
+            <h1>PONG PRO</h1>
+            <div class="login-box">
                 <input type="text" id="session-input" placeholder="Código de sesión...">
                 <button onclick="loadSession()">CARGAR CUENTA</button>
             </div>
-            <button class="btn-main" onclick="startGame()">JUGAR</button>
-            <button class="btn-main" onclick="showScreen('menu-shop')">TIENDA (CRATES)</button>
-            <button class="btn-main" onclick="showScreen('menu-inventory')">INVENTARIO</button>
+            <button class="btn-primary" onclick="startGame()">JUGAR</button>
+            <button class="btn-primary" onclick="showScreen('menu-shop')">TIENDA / CRATES</button>
+            <button class="btn-primary" onclick="showScreen('menu-inventory')">INVENTARIO</button>
         </div>
 
-        <!-- Tienda / Crates -->
+        <!-- Tienda de Crates -->
         <div id="menu-shop" class="screen" style="display:none;">
             <h2>TIENDA DE CRATES</h2>
-            <div class="crates-container">
-                <div class="crate basic">
-                    <p>CRATE BÁSICO</p>
-                    <span>100 🪙</span>
-                    <button onclick="buyCrate('basic')">ABRIR</button>
+            <div class="crates-flex">
+                <div class="crate-card basic">
+                    <h3>BÁSICO</h3>
+                    <p>Fondos y Colores</p>
+                    <button onclick="buyCrate('basic')">ABRIR (100 🪙)</button>
                 </div>
-                <div class="crate god">
-                    <p>CRATE DIOS</p>
-                    <span>1000 🪙</span>
-                    <button onclick="buyCrate('god')">ABRIR</button>
+                <div class="crate-card god">
+                    <h3>DIOS</h3>
+                    <p>Legendarios & Dios</p>
+                    <button onclick="buyCrate('god')">ABRIR (1000 🪙)</button>
                 </div>
             </div>
             <button onclick="showScreen('menu-main')">VOLVER</button>
@@ -54,6 +54,7 @@
         <canvas id="pongCanvas"></canvas>
     </div>
 
+    <script src="app.js"></script>
     <script src="game.js"></script>
 </body>
 </html>
