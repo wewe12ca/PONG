@@ -2,93 +2,58 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>PONG ULTIMATE 2026</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PONG COSMIC - 2026</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="top-bar">
-        <div class="stat-group">
-            <div id="user-pill-frame" class="user-pill">👤 <span id="display-username">Invitado</span></div>
-            <div class="coin-pill">💰 <span id="display-coins">0</span> PC</div>
+    <div id="game-container">
+        <!-- HUD Superior -->
+        <div id="hud" style="display:none;">
+            <span>Vidas: <span id="lives-display">3</span></span>
+            <span>Monedas: <span id="coins-display">0</span></span>
         </div>
-        <div id="game-info" style="display:none; color:cyan; font-size:12px;">P1:W/S | P2:T/G | P3:I/K | P4:↑/↓</div>
+
+        <!-- Menú Principal -->
+        <div id="menu-main" class="screen">
+            <h1>PONG ULTIMATE</h1>
+            <div class="login-section">
+                <input type="text" id="session-input" placeholder="Código de sesión...">
+                <button onclick="loadSession()">CARGAR CUENTA</button>
+            </div>
+            <button class="btn-main" onclick="startGame()">JUGAR</button>
+            <button class="btn-main" onclick="showScreen('menu-shop')">TIENDA (CRATES)</button>
+            <button class="btn-main" onclick="showScreen('menu-inventory')">INVENTARIO</button>
+        </div>
+
+        <!-- Tienda / Crates -->
+        <div id="menu-shop" class="screen" style="display:none;">
+            <h2>TIENDA DE CRATES</h2>
+            <div class="crates-container">
+                <div class="crate basic">
+                    <p>CRATE BÁSICO</p>
+                    <span>100 🪙</span>
+                    <button onclick="buyCrate('basic')">ABRIR</button>
+                </div>
+                <div class="crate god">
+                    <p>CRATE DIOS</p>
+                    <span>1000 🪙</span>
+                    <button onclick="buyCrate('god')">ABRIR</button>
+                </div>
+            </div>
+            <button onclick="showScreen('menu-main')">VOLVER</button>
+        </div>
+
+        <!-- Inventario -->
+        <div id="menu-inventory" class="screen" style="display:none;">
+            <h2>TU INVENTARIO</h2>
+            <div id="inventory-list"></div>
+            <button onclick="showScreen('menu-main')">VOLVER</button>
+        </div>
+
+        <canvas id="pongCanvas"></canvas>
     </div>
 
-    <canvas id="pong"></canvas>
-
-    <div id="ui-layer">
-        <!-- PANTALLA LOGIN -->
-        <div id="title-screen" class="ui-overlay active">
-            <div class="window">
-                <h1>PONG 2026</h1>
-                <input type="text" id="username-input" placeholder="Tu Nombre...">
-                <button onclick="App.checkSession()">ENTRAR</button>
-            </div>
-        </div>
-
-        <!-- MENÚ PRINCIPAL -->
-        <div id="main-menu" class="ui-overlay">
-            <div class="window">
-                <h2>MODOS</h2>
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                    <button onclick="startGame('1v1')">1 VS 1</button>
-                    <button onclick="startGame('medio')">VS CPU</button>
-                    <button onclick="startGame('2v2')" style="border-color:cyan">2 VS 2</button>
-                    <button onclick="startGame('caos')" style="grid-column: span 2; border-color:magenta">CAOS</button>
-                </div>
-                <div style="margin-top:20px; display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                    <button onclick="showUI('shop-menu')">🛒 TIENDA</button>
-                    <button onclick="App.populateInventory('paddle')">🎒 INVENTARIO</button>
-                    <button onclick="showUI('profile-menu')">👤 PERFIL</button>
-                    <button onclick="App.redeemCode()" style="border-color:#00ff88">🎁 CÓDIGOS</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- PERFIL -->
-        <div id="profile-menu" class="ui-overlay">
-            <div class="window">
-                <h2>TU PERFIL</h2>
-                <input type="text" id="change-name-input" placeholder="Nuevo nombre...">
-                <button onclick="App.changeName()">GUARDAR</button>
-                <button onclick="showUI('main-menu')">VOLVER</button>
-            </div>
-        </div>
-
-        <!-- INVENTARIO CATEGORIZADO -->
-        <div id="inventory-menu" class="ui-overlay">
-            <div class="window" style="width: 85%;">
-                <h2>INVENTARIO</h2>
-                <div class="tabs" style="display:flex; justify-content:center; gap:5px; margin-bottom:15px;">
-                    <button onclick="App.populateInventory('paddle')" style="font-size:10px;">PALAS</button>
-                    <button onclick="App.populateInventory('ball')" style="font-size:10px;">BOLAS</button>
-                    <button onclick="App.populateInventory('bg')" style="font-size:10px;">FONDOS</button>
-                    <button onclick="App.populateInventory('frame')" style="font-size:10px;">ESTILOS</button>
-                </div>
-                <div id="inventory-list" class="item-grid" style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; max-height:250px; overflow-y:auto;"></div>
-                <button onclick="showUI('main-menu')" style="margin-top:10px;">CERRAR</button>
-            </div>
-        </div>
-
-        <!-- TIENDA -->
-        <div id="shop-menu" class="ui-overlay">
-            <div class="window">
-                <h2>TIENDA</h2>
-                <div style="display:flex; gap:10px;">
-                    <div class="loot-card" onclick="App.openBox('common')">📦 100 PC</div>
-                    <div class="loot-card" onclick="App.openBox('epic')" style="border-color:magenta">💎 500 PC</div>
-                    <div class="loot-card" onclick="App.openBox('god')" style="border-color:gold">🔥 1500 PC</div>
-                </div>
-                <button onclick="showUI('main-menu')" style="margin-top:10px;">VOLVER</button>
-            </div>
-        </div>
-
-        <div id="game-over" class="ui-overlay">
-            <div class="window" id="game-over-content"></div>
-        </div>
-    </div>
-
-    <script src="app.js"></script>
     <script src="game.js"></script>
 </body>
 </html>
