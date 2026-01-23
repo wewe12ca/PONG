@@ -1,98 +1,70 @@
-const App = {
-    coins: 0,
-    username: "",
-    inventory: [],
-    equipped: { paddle: "#00f2ff", ball: "#ffffff", bg: "black", frame: "none" },
-    
-    catalog: [
-        { id: 1, type: "paddle", name: "Neon Blue", rarity: "comun", val: "#00f2ff" },
-        { id: 2, type: "paddle", name: "Ruby Laser", rarity: "epico", val: "#ff0055" },
-        { id: 3, type: "ball", name: "Fire Ball", rarity: "epico", val: "#ffaa00" },
-        { id: 4, type: "bg", name: "Cyber Grid", rarity: "epico", val: "grid" },
-        { id: 5, type: "frame", name: "God Aura", rarity: "god", val: "0 0 15px #ffd700" },
-        { id: 6, type: "ball", name: "Ghost", rarity: "god", val: "rgba(255,255,255,0.2)" }
-    ],
+// Base de datos de objetos
+const ITEMS = [
+    { id: 0, name: "Blanco Estándar", color: "#ffffff", rarity: "Común" },
+    { id: 1, name: "Cian Neón", color: "#00ffff", rarity: "Raro" },
+    { id: 2, name: "Oro Maestro", color: "#ffd700", rarity: "Legendario" },
+    { id: 3, name: "ESENCIA DIOS", color: "#ff00ff", rarity: "Dios" }
+];
 
-    init() {
-        const saved = JSON.parse(localStorage.getItem('pong_2026_pro'));
-        if (saved) {
-            this.coins = saved.coins; this.username = saved.username;
-            this.inventory = saved.inventory || [];
-            this.equipped = saved.equipped || this.equipped;
-        } else {
-            this.coins = 0; // Empezar con cero si es nuevo
-        }
-        this.updateUI();
-        if(this.username) showUI('main-menu');
-    },
-
-    save() {
-        localStorage.setItem('pong_2026_pro', JSON.stringify({
-            coins: this.coins, username: this.username, 
-            inventory: this.inventory, equipped: this.equipped
-        }));
-    },
-
-    checkSession() {
-        const n = document.getElementById('username-input').value;
-        if(!n) return alert("Escribe tu nombre");
-        this.username = n; this.save(); this.init();
-    },
-
-    changeName() {
-        const n = document.getElementById('change-name-input').value;
-        if(n) { this.username = n; this.save(); this.updateUI(); alert("Nombre cambiado"); }
-    },
-
-    redeemCode() {
-        const code = prompt("Introduce PromoCode (ej: WINNER):").toUpperCase();
-        const codesDB = { "WINNER": 5000, "MEE": 10000, "GODMODE": 50000, "2026": 2000, "DORADO": 15000 };
-        if(codesDB[code]) { this.coins += codesDB[code]; this.save(); this.updateUI(); alert("¡Código aceptado!"); }
-        else alert("Código inválido");
-    },
-
-    openBox(rarity) {
-        let cost = rarity === 'god' ? 1500 : (rarity === 'epic' ? 500 : 100);
-        if (this.coins < cost) return alert("PC Insuficientes");
-        this.coins -= cost;
-
-        let pool = this.catalog.filter(item => {
-            if(rarity === 'god') return item.rarity === 'god';
-            if(rarity === 'epic') return item.rarity === 'epico';
-            return item.rarity === 'comun';
-        });
-
-        let prize = pool[Math.floor(Math.random()*pool.length)];
-        if(!this.inventory.find(i => i.id === prize.id)) this.inventory.push(prize);
-        alert(`¡BOTÍN! Has ganado: ${prize.name}`);
-        this.save(); this.updateUI();
-    },
-
-    populateInventory(type) {
-        showUI('inventory-menu');
-        const list = document.getElementById('inventory-list');
-        list.innerHTML = "";
-        const filtered = this.inventory.filter(i => i.type === type);
-        filtered.forEach(item => {
-            let col = item.rarity === 'god' ? 'gold' : (item.rarity === 'epico' ? '#ff00ff' : '#00f2ff');
-            list.innerHTML += `<div class="loot-card" style="border-color:${col}; font-size:12px;">
-                ${item.name}<br>
-                <button onclick="App.equip('${item.type}', '${item.val}')" style="font-size:9px;">EQUIPAR</button>
-            </div>`;
-        });
-    },
-
-    equip(type, val) { this.equipped[type] = val; this.save(); this.updateUI(); alert("Equipado"); },
-
-    updateUI() {
-        document.getElementById('display-coins').innerText = this.coins;
-        document.getElementById('display-username').innerText = this.username;
-        document.getElementById('user-pill-frame').style.boxShadow = this.equipped.frame === "none" ? "" : this.equipped.frame;
-    }
+// Estado global del usuario
+let user = {
+    coins: 100,
+    inventory: [0],
+    equipped: 0,
+    sessionCode: Math.random().toString(36).substring(2, 8).toUpperCase()
 };
 
-function showUI(id) {
-    document.querySelectorAll('.ui-overlay').forEach(el => el.classList.remove('active'));
-    if(id !== 'none') document.getElementById(id).classList.add('active');
+function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+    document.getElementById(id).style.display = 'flex';
+    if(id === 'menu-inventory') renderInventory();
 }
-window.onload = () => App.init();
+
+function saveToLocal() {
+    localStorage.setItem(user.sessionCode, JSON.stringify(user));
+}
+
+function loadSession() {
+    const code = document.getElementById("session-input").value.toUpperCase();
+    const data = localStorage.getItem(code);
+    if(data) {
+        user = JSON.parse(data);
+        alert("Sesión cargada. Código: " + user.sessionCode);
+        showScreen('menu-main');
+    } else {
+        alert("El código no existe.");
+    }
+}
+
+function buyCrate(type) {
+    let cost = (type === 'basic') ? 100 : 1000;
+    if(user.coins < cost) return alert("Monedas insuficientes.");
+
+    user.coins -= cost;
+    let rand = Math.random() * 100;
+    let reward;
+
+    if(type === 'basic') {
+        reward = rand > 20 ? ITEMS[0] : ITEMS[1]; // 80% Común, 20% Raro
+    } else {
+        reward = rand > 30 ? ITEMS[2] : ITEMS[3]; // 70% Legendario, 30% Dios
+    }
+
+    if(!user.inventory.includes(reward.id)) user.inventory.push(reward.id);
+    alert(`¡HAS OBTENIDO: ${reward.name}!\nCódigo: ${user.sessionCode}`);
+    saveToLocal();
+}
+
+function renderInventory() {
+    const list = document.getElementById("inventory-list");
+    list.innerHTML = "";
+    user.inventory.forEach(id => {
+        const item = ITEMS.find(i => i.id === id);
+        const b = document.createElement("button");
+        b.className = `rarity-${item.rarity}`;
+        b.style.padding = "10px";
+        b.innerHTML = `${item.name}<br>${item.rarity}`;
+        b.onclick = () => { user.equipped = item.id; saveToLocal(); alert("Equipado"); };
+        list.appendChild(b);
+    });
+}
