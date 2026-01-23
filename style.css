@@ -1,154 +1,64 @@
-/* CONFIGURACIÓN BASE 2026 */
 :root {
     --neon-blue: #00f2ff;
     --neon-pink: #ff00ff;
     --neon-gold: #ffd700;
-    --bg-dark: #0a0a12;
-    --glass: rgba(255, 255, 255, 0.1);
 }
 
 body, html {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
-    background: var(--bg-dark);
-    color: white;
-    font-family: 'Orbitron', 'Segoe UI', sans-serif;
+    margin: 0; padding: 0; width: 100%; height: 100%;
+    background: #0a0a12; color: white; font-family: 'Segoe UI', sans-serif;
     overflow: hidden;
 }
 
-/* BARRA SUPERIOR */
 #top-bar {
-    position: fixed;
-    top: 0;
-    width: 100%;
-    height: 60px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: rgba(0, 0, 0, 0.8);
-    border-bottom: 2px solid var(--neon-blue);
-    z-index: 100;
-    padding: 0 20px;
+    position: fixed; top: 0; width: 100%; height: 60px; display: flex;
+    justify-content: space-between; align-items: center; background: rgba(0, 0, 0, 0.8);
+    border-bottom: 2px solid var(--neon-blue); z-index: 100; padding: 0 20px;
     box-sizing: border-box;
 }
-
 .stat-group { display: flex; gap: 15px; }
 .user-pill, .coin-pill {
-    background: var(--glass);
-    padding: 5px 15px;
-    border-radius: 20px;
-    border: 1px solid var(--neon-blue);
-    font-size: 0.9rem;
+    background: rgba(255, 255, 255, 0.1); padding: 5px 15px; border-radius: 20px;
+    border: 1px solid var(--neon-blue); font-size: 0.9rem;
 }
 
-/* CAPAS DE INTERFAZ (UI) */
 .ui-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.85);
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
+    position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); display: none;
+    flex-direction: column; align-items: center; justify-content: center; z-index: 1000;
 }
+.ui-overlay.active { display: flex !important; }
 
-.ui-overlay.active {
-    display: flex !important;
-}
-
-/* VENTANAS MODULARES */
 .window {
-    background: #1a1a2e;
-    padding: 30px;
-    border: 2px solid var(--neon-pink);
-    border-radius: 15px;
-    text-align: center;
-    box-shadow: 0 0 20px var(--neon-pink);
+    background: #1a1a2e; padding: 30px; border: 2px solid var(--neon-pink);
+    border-radius: 10px; text-align: center; box-shadow: 0 0 20px var(--neon-pink);
     min-width: 320px;
 }
-
-.logo {
-    font-size: 3rem;
-    margin-bottom: 20px;
-    letter-spacing: 5px;
-}
+.logo { font-size: 3rem; margin-bottom: 20px; }
 .logo span { color: var(--neon-blue); }
 
-/* BOTONES NEÓN */
 button {
-    background: transparent;
-    color: white;
-    border: 1px solid var(--neon-blue);
-    padding: 12px 25px;
-    margin: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    text-transform: uppercase;
-    transition: 0.3s;
+    background: transparent; color: white; border: 1px solid var(--neon-blue);
+    padding: 10px 20px; margin: 5px; cursor: pointer; transition: 0.3s;
     border-radius: 5px;
 }
+button:hover { background: var(--neon-blue); color: black; box-shadow: 0 0 15px var(--neon-blue); }
 
-button:hover {
-    background: var(--neon-blue);
-    color: black;
-    box-shadow: 0 0 15px var(--neon-blue);
-}
-
-/* INPUTS */
-input[type="text"] {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid var(--neon-blue);
-    padding: 10px;
-    color: white;
-    text-align: center;
-    border-radius: 5px;
+input {
+    background: rgba(255, 255, 255, 0.1); border: 1px solid var(--neon-blue);
+    padding: 10px; color: white; text-align: center; border-radius: 5px;
     margin-bottom: 15px;
 }
 
-/* TIENDA E INVENTARIO */
-.shop-grid, .item-grid {
-    display: grid;
-    gap: 15px;
-    margin-top: 20px;
-}
-
 .loot-card {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--neon-blue);
-    padding: 15px;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: 0.2s;
+    background: rgba(255, 255, 255, 0.05); border: 1px solid var(--neon-blue);
+    padding: 15px; border-radius: 10px; cursor: pointer; transition: 0.2s;
 }
-
-.loot-card:hover {
-    transform: translateY(-5px);
-    background: rgba(255, 255, 255, 0.1);
-}
-
-/* RARIDADES */
-.loot-card[style*="gold"] { 
-    animation: goldGlow 1.5s infinite alternate; 
-}
+.loot-card:hover { transform: translateY(-5px); background: rgba(255, 255, 255, 0.1); }
+.loot-card[style*="gold"] { animation: goldGlow 1.5s infinite alternate; }
 
 @keyframes goldGlow {
     from { box-shadow: 0 0 5px var(--neon-gold); }
     to { box-shadow: 0 0 20px var(--neon-gold); }
 }
 
-/* CANVAS JUEGO */
-canvas {
-    display: block;
-    width: 100vw;
-    height: 100vh;
-    background: radial-gradient(circle, #1a1a2e 0%, #000 100%);
-}
-
-/* MENÚ DE GAME OVER */
-#game-over h1 {
-    color: #ff4444;
-    font-size: 2.5rem;
-}
+canvas { display: block; width: 100vw; height: 100vh; background: black; }
