@@ -1,5 +1,5 @@
 const App = {
-    coins: 500,
+    coins: 0,
     username: "",
     inventory: [],
     equipped: { paddle: "#00f2ff", ball: "#ffffff", bg: "black", frame: "none" },
@@ -19,9 +19,11 @@ const App = {
             this.coins = saved.coins; this.username = saved.username;
             this.inventory = saved.inventory || [];
             this.equipped = saved.equipped || this.equipped;
-            this.updateUI();
-            if(this.username) showUI('main-menu');
+        } else {
+            this.coins = 0; // Empezar con cero si es nuevo
         }
+        this.updateUI();
+        if(this.username) showUI('main-menu');
     },
 
     save() {
@@ -43,7 +45,7 @@ const App = {
     },
 
     redeemCode() {
-        const code = prompt("Introduce PromoCode:").toUpperCase();
+        const code = prompt("Introduce PromoCode (ej: WINNER):").toUpperCase();
         const codesDB = { "WINNER": 5000, "MEE": 10000, "GODMODE": 50000, "2026": 2000, "DORADO": 15000 };
         if(codesDB[code]) { this.coins += codesDB[code]; this.save(); this.updateUI(); alert("¡Código aceptado!"); }
         else alert("Código inválido");
@@ -53,7 +55,14 @@ const App = {
         let cost = rarity === 'god' ? 1500 : (rarity === 'epic' ? 500 : 100);
         if (this.coins < cost) return alert("PC Insuficientes");
         this.coins -= cost;
-        let prize = this.catalog[Math.floor(Math.random()*this.catalog.length)];
+
+        let pool = this.catalog.filter(item => {
+            if(rarity === 'god') return item.rarity === 'god';
+            if(rarity === 'epic') return item.rarity === 'epico';
+            return item.rarity === 'comun';
+        });
+
+        let prize = pool[Math.floor(Math.random()*pool.length)];
         if(!this.inventory.find(i => i.id === prize.id)) this.inventory.push(prize);
         alert(`¡BOTÍN! Has ganado: ${prize.name}`);
         this.save(); this.updateUI();
