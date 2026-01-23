@@ -31,6 +31,7 @@
             <div class="window">
                 <h2>MODOS</h2>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <button onclick="startGame('1v1')">1 VS 1</button>
                     <button onclick="startGame('medio')">VS CPU</button>
                     <button onclick="startGame('2v2')" style="border-color:cyan">2 VS 2</button>
                     <button onclick="startGame('caos')" style="grid-column: span 2; border-color:magenta">CAOS</button>
@@ -74,9 +75,9 @@
             <div class="window">
                 <h2>TIENDA</h2>
                 <div style="display:flex; gap:10px;">
-                    <div class="loot-card" onclick="App.openBox('common')">📦 100</div>
-                    <div class="loot-card" onclick="App.openBox('epic')" style="border-color:magenta">💎 500</div>
-                    <div class="loot-card" onclick="App.openBox('god')" style="border-color:gold">🔥 1500</div>
+                    <div class="loot-card" onclick="App.openBox('common')">📦 100 PC</div>
+                    <div class="loot-card" onclick="App.openBox('epic')" style="border-color:magenta">💎 500 PC</div>
+                    <div class="loot-card" onclick="App.openBox('god')" style="border-color:gold">🔥 1500 PC</div>
                 </div>
                 <button onclick="showUI('main-menu')" style="margin-top:10px;">VOLVER</button>
             </div>
