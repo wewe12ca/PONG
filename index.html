@@ -6,13 +6,12 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Barra superior solo con info básica -->
     <div id="top-bar">
         <div class="stat-group">
-            <div class="user-pill">👤 <span id="display-username">Invitado</span></div>
-            <div class="coin-pill">💰 <span id="display-coins">0</span> PC</div>
+            <div>👤 <span id="display-username">...</span></div>
+            <div>💰 <span id="display-coins">0</span> PC</div>
         </div>
-        <button onclick="App.logout()" style="color:#ff4444; border-color:#ff4444; padding:5px 10px;">SALIR</button>
+        <div id="game-info" style="display:none; color:#00f2ff;">P1:W/S | P2:T/G | P3:I/K | P4:↑/↓</div>
     </div>
 
     <canvas id="pong"></canvas>
@@ -21,26 +20,25 @@
         <!-- PANTALLA DE INICIO -->
         <div id="title-screen" class="ui-overlay active">
             <div class="window">
-                <h1 class="logo">PONG<span>2026</span></h1>
-                <input type="text" id="username-input" placeholder="Tu nombre...">
-                <button onclick="App.checkSession()">INICIAR SESIÓN</button>
+                <h1>PONG 2026</h1>
+                <input type="text" id="username-input" placeholder="Tu Nombre...">
+                <button onclick="App.checkSession()">ENTRAR</button>
             </div>
         </div>
 
-        <!-- MENÚ PRINCIPAL (BOTONES AQUÍ) -->
+        <!-- MENÚ PRINCIPAL -->
         <div id="main-menu" class="ui-overlay">
             <div class="window">
-                <h2 class="neon-text">MENÚ PRINCIPAL</h2>
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                    <button onclick="startGame('1v1')" style="grid-column: span 2; background: #00f2ff33;">JUGAR 1 VS 1</button>
-                    <button onclick="startGame('2v2')" style="grid-column: span 2;">MODO 2 VS 2</button>
-                    <button onclick="startGame('caos')">CAOS 1v1</button>
-                    <button onclick="startGame('caos2v2')">CAOS 2v2</button>
+                <h2>MODOS DE JUEGO</h2>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+                    <button onclick="startGame('medio')">VS CPU</button>
+                    <button onclick="startGame('2v2')" style="border-color:cyan">2 VS 2</button>
+                    <button onclick="startGame('caos')" style="grid-column: span 2; border-color:magenta">MODO CAOS</button>
                 </div>
-                <hr style="margin:20px 0; border:0; border-top:1px solid #333;">
-                <div style="display:flex; gap:10px;">
-                    <button onclick="showUI('shop-menu')" style="flex:1; border-color: gold;">🛒 TIENDA</button>
-                    <button onclick="App.populateInventory()" style="flex:1; border-color: #ff00ff;">🎒 INVENTARIO</button>
+                <div style="margin-top:20px; border-top:1px solid #333; padding-top:15px;">
+                    <button onclick="showUI('shop-menu')">🛒 TIENDA</button>
+                    <button onclick="App.populateInventory()">🎒 INVENTARIO</button>
+                    <button onclick="App.redeemCode()" style="border-color:#00ff88">🎁 CÓDIGOS</button>
                 </div>
             </div>
         </div>
@@ -49,25 +47,24 @@
         <div id="shop-menu" class="ui-overlay">
             <div class="window">
                 <h2>TIENDA DE CRATES</h2>
-                <div class="shop-grid" style="display:flex; gap:10px;">
-                    <div class="loot-card" onclick="App.openBox('common')" style="border-color:#00f2ff">📦 BRONCE<br>100 PC</div>
-                    <div class="loot-card" onclick="App.openBox('epic')" style="border-color:#ff00ff">💎 ÉPICA<br>500 PC</div>
-                    <div class="loot-card" onclick="App.openBox('god')" style="border-color:gold">🔥 DIOS<br>1500 PC</div>
+                <div style="display:flex; gap:10px;">
+                    <div class="loot-card" onclick="App.openBox('common')">📦 100</div>
+                    <div class="loot-card" onclick="App.openBox('epic')" style="border-color:#ff00ff">💎 500</div>
+                    <div class="loot-card" onclick="App.openBox('god')" style="border-color:gold">🔥 1500</div>
                 </div>
-                <button onclick="showUI('main-menu')" style="margin-top:20px;">VOLVER</button>
+                <button onclick="showUI('main-menu')" style="margin-top:15px;">VOLVER</button>
             </div>
         </div>
 
         <!-- INVENTARIO -->
         <div id="inventory-menu" class="ui-overlay">
             <div class="window">
-                <h2>TU COLECCIÓN</h2>
-                <div id="inventory-list" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; max-height:300px; overflow-y:auto; padding:10px;"></div>
-                <button onclick="showUI('main-menu')" style="margin-top:20px;">VOLVER</button>
+                <h2>COLECCIÓN</h2>
+                <div id="inventory-list" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; max-height:250px; overflow-y:auto;"></div>
+                <button onclick="showUI('main-menu')" style="margin-top:15px;">CERRAR</button>
             </div>
         </div>
 
-        <!-- GAME OVER -->
         <div id="game-over" class="ui-overlay">
             <div class="window" id="game-over-content"></div>
         </div>
